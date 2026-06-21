@@ -22,10 +22,10 @@ struct SystemInputs {
 };
 
 enum class RunMode {
-    FLIGHT,
-    IMU_SIM,
-    RC_SIM,
-    SIMULATION
+    FLIGHT,     // Normal operation with real sensors and RC
+    IMU_SIM,    // Simulated IMU data, real RC input
+    RC_SIM,     // Simulated RC input, real IMU data
+    SIMULATION  // Fully simulated (for testing without hardware)
 };
 
 

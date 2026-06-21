@@ -1,5 +1,13 @@
-# freeRTOS-pico
-Testing with a Raspberry Pi Pico and RTOS
+# Lego Drone with Raspberry Pi Pico
+Personal project to build a quadcopter using a LEGO Technic custom frame, a Raspberry Pi Pico (RP2040) and FreeRTOS,
+as a way to explore embedded software architecture and flight control using intentionally non-optimal hardware.
+
+## Features
+* FreeRTOS running on RP2040
+* CMake-based build system
+* Modular task architecture
+* Queue-based inter-task communication
+* Centralized configuration
 
 # How to compile
 
