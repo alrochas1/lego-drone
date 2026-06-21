@@ -14,7 +14,7 @@
 #include "drone_project/tasks/log_task.hpp"
 
 #include "drone_project/tasks/imu_task.hpp"
-//#include "drone_project/tasks/ir_task.hpp"
+#include "drone_project/tasks/ir_task.hpp"
 
 #include "drone_project/tasks/motor_task.hpp"
 #include "drone_project/tasks/control_task.hpp"
@@ -88,7 +88,7 @@ int start_tasks(bool success) {
 int drone_main() {
 
     // For testing individual tasks without the full setup
-    RunMode running_mode = RunMode::SIMULATION;
+    RunMode running_mode = RunMode::IMU_SIM;
     
     common_main();
 
@@ -115,7 +115,7 @@ int drone_main() {
     if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) {
         rc_task = new RCSimTask(queues.rc_queue);
     } else {
-        // rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
+        rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
     }
 
     // Control task
