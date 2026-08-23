@@ -7,6 +7,7 @@
 
 #include "drone_project/config/project_config.hpp"
 #include "drone_project/types/system_data.hpp"
+#include "drone_project/types/freeRTOS_data.hpp"
 
 #include "tasks/system/system_task.hpp"
 

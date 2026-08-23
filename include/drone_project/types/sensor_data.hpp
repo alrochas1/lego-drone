@@ -1,3 +1,5 @@
+// sensor_data.hpp
+
 #pragma once
 #include <cstdint>
 #include <cmath>
