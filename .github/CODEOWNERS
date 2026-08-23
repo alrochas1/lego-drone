@@ -1,0 +1,5 @@
+# Protect the file CODEOWNERS
+.github/CODEOWNERS @alrochas1
+
+# Rest of code
+* @alrochas1

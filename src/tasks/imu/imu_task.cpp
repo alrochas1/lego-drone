@@ -1,5 +1,5 @@
 // imu_task.cpp --> Both accel and gyro tasks
-#include "drone_project/tasks/imu_task.hpp"
+#include "tasks/imu/imu_task.hpp"
 #include <cstdio>
 
 using namespace config;

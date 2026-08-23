@@ -1,4 +1,4 @@
-#include "drone_project/drivers/lsm303d_accel.hpp"
+#include "drivers/lsm303d_accel.hpp"
 #include <cstdio>
 #include <array>
 

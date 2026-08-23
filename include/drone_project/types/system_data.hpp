@@ -1,3 +1,5 @@
+// system_data.hpp
+
 #pragma once
 #include "drone_project/types/sensor_data.hpp"
 #include "drone_project/types/comms_data.hpp"
@@ -26,20 +28,6 @@ enum class RunMode {
     IMU_SIM,    // Simulated IMU data, real RC input
     RC_SIM,     // Simulated RC input, real IMU data
     SIMULATION  // Fully simulated (for testing without hardware)
-};
-
-
-struct SystemQueues {
-    
-    // System queue for system monitor and logging
-    QueueHandle_t snapshot_queue;
-
-    // Imput Queues
-    QueueHandle_t rc_queue;
-    QueueHandle_t imu_queue;
-        
-    // Output Queues
-    QueueHandle_t motor_queue;
 };
 
 struct SystemSnapshot {

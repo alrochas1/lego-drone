@@ -1,5 +1,5 @@
 // i2c_device.cpp
-#include "drone_project/drivers/i2c_device.hpp"
+#include "drivers/i2c_device.hpp"
 #include "drone_project/config/project_config.hpp"
 
 #include <cstdio>

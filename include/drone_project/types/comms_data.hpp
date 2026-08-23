@@ -1,4 +1,8 @@
+// comms_data.hpp
+
 #pragma once
+
+#include <cstdint>
 
 struct RCCommand {
     bool  valid;      // ON/OFF

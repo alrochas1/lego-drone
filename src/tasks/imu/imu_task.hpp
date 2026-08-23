@@ -6,9 +6,9 @@
 #include <drone_project/types/sensor_data.hpp>
 #include "drone_project/config/project_config.hpp"
 
-#include "task_wrapper.hpp"
-#include <drone_project/drivers/l3gd20.hpp>
-#include <drone_project/drivers/lsm303d_accel.hpp>
+#include "tasks/common/task_wrapper.hpp"
+#include <drivers/l3gd20.hpp>
+#include <drivers/lsm303d_accel.hpp>
 
 
 class IMUTask : public I2CSensorTask {

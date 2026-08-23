@@ -1,6 +1,6 @@
 // control_task.hpp
 #pragma once
-#include "task_wrapper.hpp"
+#include "tasks/common/task_wrapper.hpp"
 #include "drone_project/config/project_config.hpp"
 
 #include "drone_project/types/system_data.hpp"

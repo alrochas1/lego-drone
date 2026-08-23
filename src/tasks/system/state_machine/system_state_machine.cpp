@@ -1,76 +1,23 @@
-// system_task.cpp
-#include "drone_project/tasks/system_task.hpp"
+// system_state_machine.cpp
 
-#define SIM_BATTERY 0 // For testing without battery (USB mode). Be careful if the motors are connected!
+#include "system_state_machine.hpp"
+#include "drone_project/config/project_config.hpp"
 
 using namespace config;
 
-
-SystemStateTask::SystemStateTask(QueueHandle_t imu_q,
-                             QueueHandle_t rc_q,
-                             QueueHandle_t state_q)
-    : Task("STATE", 512, 3),
-      imu_queue_(imu_q),
-      rc_queue_(rc_q),
-      state_queue_(state_q),
-      state_(SystemState::INIT),
+SystemStateMachine::SystemStateMachine()
+    : state_(SystemState::INIT),
+      init_count_(0),
       imu_fail_count_(0),
       rc_fail_count_(0),
-      init_count_(0),
       throttle_low_count_(0)
-      {
-        printf("[SYSTEM STATE] Task created\n");
-      }
-
-
-void SystemStateTask::run() {
-
-    SystemInputs inputs{};
-    SensorData imu{};
-    RCCommand rc{};
-    SystemSnapshot snap{};
-
-    printf("[SYSTEM STATE] Task started - Update interval: %lu ms\n", tasks::SYSTEM_UPDATE_MS);
-
-    while (true) {
-
-        snap.timestamp_ms = xTaskGetTickCount() * portTICK_PERIOD_MS;
-
-        // USB
-        inputs.usb_connected = gpio_get(pins::USB_PIN);
-        #if SIM_BATTERY
-        inputs.usb_connected = false; // TESTING
-        #endif
-
-        // IMU
-        if (xQueueReceive(imu_queue_, &imu, 0) == pdPASS) {
-            inputs.imu_ok = imu.has_gyro() && imu.has_accel(); // Add mag if needed
-            snap.imu = imu;
-        }
-
-        // RC
-        if (xQueueReceive(rc_queue_, &rc, 0) == pdPASS) {
-            inputs.rc_ok = rc.valid;
-            inputs.throttle = rc.throttle;
-            snap.rc = rc;
-        } else {
-            inputs.rc_ok = false;
-        }
-
-        // FSM
-        update_state(&state_, inputs);
-        snap.state = state_;
-
-        xQueueOverwrite(state_queue_, &snap);
-
-        delay(tasks::SYSTEM_UPDATE_MS);
-    }
+{
 }
 
 
-void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
-
-    switch (*state) {
+void SystemStateMachine::update_state(const SystemInputs& in) {
+    
+    switch (state_) {
     case SystemState::INIT:
         // Initial state: System is starting up
         // Transitions:
@@ -80,13 +27,13 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         // - Stay in INIT otherwise
         if (in.usb_connected)
         {
-            *state = SystemState::USB;
+            state_ = SystemState::USB;
         } 
         else if (in.imu_ok) 
         {
             if(init_count_ > tasks::INIT_COUNTDOWN)
             {
-                *state = SystemState::DISARMED;
+                state_ = SystemState::DISARMED;
                 init_count_ = 0;        // reset
                 imu_fail_count_ = 0;    // reset
             }
@@ -100,7 +47,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if(imu_fail_count_ > tasks::IMU_COUNTDOWN)
             {
-                *state = SystemState::ERROR;
+                state_ = SystemState::ERROR;
             }
             else
             {
@@ -127,7 +74,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (imu_fail_count_ > tasks::IMU_COUNTDOWN)
             {
-                *state = SystemState::ERROR;
+                state_ = SystemState::ERROR;
                 imu_fail_count_ = 0;  // reset
             }
             else
@@ -144,7 +91,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (rc_fail_count_ > tasks::RC_COUNTDOWN)
             {
-                *state = SystemState::FAILSAFE;
+                state_ = SystemState::FAILSAFE;
                 rc_fail_count_ = 0;  // reset
             }
             else
@@ -158,7 +105,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         }
         
         if (in.throttle < 0.05f) {
-            *state = SystemState::ARMED;
+            state_ = SystemState::ARMED;
         }
         // If no transition, stay in DISARMED
         break;
@@ -174,7 +121,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (rc_fail_count_ > tasks::RC_COUNTDOWN)
             {
-                *state = SystemState::FAILSAFE;
+                state_ = SystemState::FAILSAFE;
                 rc_fail_count_ = 0;  // reset
             }
             else
@@ -191,7 +138,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (imu_fail_count_ > tasks::IMU_COUNTDOWN)
             {
-                *state = SystemState::ERROR;
+                state_ = SystemState::ERROR;
                 imu_fail_count_ = 0;  // reset
             } 
             else 
@@ -206,7 +153,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         
         if (in.throttle > 0.1f) 
         {
-            *state = SystemState::FLIGHT;
+            state_ = SystemState::FLIGHT;
         } 
         // If no transition, stay in ARMED
         break;
@@ -222,7 +169,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (rc_fail_count_ > tasks::RC_COUNTDOWN) 
             {
-                *state = SystemState::FAILSAFE;
+                state_ = SystemState::FAILSAFE;
                 rc_fail_count_ = 0;  // reset
             } 
             else 
@@ -239,7 +186,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (imu_fail_count_ > tasks::IMU_COUNTDOWN) 
             {
-                *state = SystemState::ERROR;
+                state_ = SystemState::ERROR;
                 imu_fail_count_ = 0;  // reset
             } 
             else 
@@ -256,7 +203,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         {
             if (throttle_low_count_ > tasks::THROTTLE_LOW_COUNTDOWN) 
             {
-                *state = SystemState::ARMED;
+                state_ = SystemState::ARMED;
                 throttle_low_count_ = 0;  // reset
             } 
             else 
@@ -278,7 +225,7 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
         // - Stay in FAILSAFE otherwise
         if (in.rc_ok && in.imu_ok) 
         {
-            *state = SystemState::DISARMED;
+            state_ = SystemState::DISARMED;
         }
         // If no transition, stay in FAILSAFE
         break;
@@ -293,8 +240,12 @@ void SystemStateTask::update_state(SystemState* state, const SystemInputs& in) {
 
     default:
         // Unknown state, set to ERROR for safety
-        *state = SystemState::ERROR;
+        state_ = SystemState::ERROR;
         break;
     }
 }
 
+
+SystemState SystemStateMachine::getState() const{
+    return state_;
+}
