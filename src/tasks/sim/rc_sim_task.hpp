@@ -1,6 +1,6 @@
 // rc_sim_task.hpp
 #pragma once
-#include "drone_project/tasks/task_wrapper.hpp"
+#include "tasks/common/task_wrapper.hpp"
 #include "drone_project/types/comms_data.hpp"
 #include <queue.h>
 

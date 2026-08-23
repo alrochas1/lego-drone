@@ -1,5 +1,5 @@
 // l3gd20.cpp
-#include "drone_project/drivers/l3gd20.hpp"
+#include "drivers/l3gd20.hpp"
 #include <cstdio>
 #include <array>
 

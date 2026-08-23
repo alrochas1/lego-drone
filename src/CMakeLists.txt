@@ -1,17 +1,7 @@
-# add_executable(${ProjectName}
-#     main.cpp
-#     # Add other source files here as needed
-# )
-
 # Search for all source and header files
 file(GLOB_RECURSE SOURCES 
     "*.cpp" 
     "*.c"
-)
-
-file(GLOB_RECURSE HEADERS 
-    "*.hpp" 
-    "*.h"
 )
 
 # Create executable

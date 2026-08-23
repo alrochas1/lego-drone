@@ -1,5 +1,5 @@
 // motor_task.cpp
-#include "drone_project/tasks/motor_task.hpp"
+#include "tasks/motor/motor_task.hpp"
 
 using namespace config;
 

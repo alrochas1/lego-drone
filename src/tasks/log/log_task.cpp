@@ -1,5 +1,5 @@
 // log_task.cpp
-#include "drone_project/tasks/log_task.hpp"
+#include "tasks/log/log_task.hpp"
 #include "drone_project/config/project_config.hpp"
 #include <cstdio>
 

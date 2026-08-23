@@ -1,5 +1,5 @@
 // control_task.cpp
-#include "drone_project/tasks/control_task.hpp"
+#include "tasks/control/control_task.hpp"
 
 using namespace config;
 

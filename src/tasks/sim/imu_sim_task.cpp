@@ -1,5 +1,5 @@
 // imu_sim_task.cpp
-#include "drone_project/tasks/sim/imu_sim_task.hpp"
+#include "tasks/sim/imu_sim_task.hpp"
 
 using namespace config;
 

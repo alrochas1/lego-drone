@@ -8,20 +8,20 @@
 #include "drone_project/config/project_config.hpp"
 #include "drone_project/types/system_data.hpp"
 
-#include "drone_project/tasks/system_task.hpp"
+#include "tasks/system/system_task.hpp"
 
-#include "drone_project/tasks/led_task.hpp"
-#include "drone_project/tasks/log_task.hpp"
+#include "tasks/led/led_task.hpp"
+#include "tasks/log/log_task.hpp"
 
-#include "drone_project/tasks/imu_task.hpp"
-#include "drone_project/tasks/ir_task.hpp"
+#include "tasks/imu/imu_task.hpp"
+#include "tasks/ir/ir_task.hpp"
 
-#include "drone_project/tasks/motor_task.hpp"
-#include "drone_project/tasks/control_task.hpp"
+#include "tasks/motor/motor_task.hpp"
+#include "tasks/control/control_task.hpp"
 
 // Sim tasks (for testing without hardware)
-#include "drone_project/tasks/sim/rc_sim_task.hpp"
-#include "drone_project/tasks/sim/imu_sim_task.hpp"
+#include "tasks/sim/rc_sim_task.hpp"
+#include "tasks/sim/imu_sim_task.hpp"
 
 
 using namespace config;

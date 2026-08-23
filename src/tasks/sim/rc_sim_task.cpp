@@ -1,5 +1,5 @@
 // rc_sim_task.cpp
-#include "drone_project/tasks/sim/rc_sim_task.hpp"
+#include "tasks/sim/rc_sim_task.hpp"
 #include "drone_project/config/project_config.hpp"
 
 using namespace config;
