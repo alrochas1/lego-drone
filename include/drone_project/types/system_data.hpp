@@ -1,6 +1,9 @@
 #pragma once
+#include "FreeRTOS.h"
+#include "queue.h"
 #include "drone_project/types/sensor_data.hpp"
 #include "drone_project/types/comms_data.hpp"
+#include "drone_project/types/system_data.hpp"
 
 // SYSTEM STATES
 enum class SystemState {

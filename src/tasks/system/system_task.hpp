@@ -1,5 +1,6 @@
 // system_state_task.cpp
 #include "tasks/common/task_wrapper.hpp"
+#include "state_machine/system_state_machine.hpp"
 
 #include "drone_project/config/project_config.hpp"
 #include "drone_project/types/system_data.hpp"
@@ -16,13 +17,7 @@ private:
     QueueHandle_t rc_queue_;
     QueueHandle_t state_queue_;
 
-    SystemState state_;
-
-    // Counters for state machine countdowns
-    uint32_t init_count_;
-    uint32_t imu_fail_count_;
-    uint32_t rc_fail_count_;
-    uint32_t throttle_low_count_;
+    SystemStateMachine state_machine_;
 
 public:
     SystemStateTask(QueueHandle_t imu_q,
