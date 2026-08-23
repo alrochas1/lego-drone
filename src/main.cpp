@@ -15,7 +15,7 @@
 #include "tasks/log/log_task.hpp"
 
 #include "tasks/imu/imu_task.hpp"
-#include "tasks/ir/ir_task.hpp"
+// #include "tasks/ir/ir_task.hpp"
 
 #include "tasks/motor/motor_task.hpp"
 #include "tasks/control/control_task.hpp"
@@ -116,7 +116,7 @@ int drone_main() {
     if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) {
         rc_task = new RCSimTask(queues.rc_queue);
     } else {
-        rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
+        // rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
     }
 
     // Control task
