@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Name project
-SET(ProjectName freeRTOS_Pico_Drone_Project)
-
-# Set path to the Raspberry Pi Pico SDK (set here your SDK path)
-SET(PICO_SDK_PATH "/home/alejandro/Github/pico-sdk")
+SET(ProjectName freeRTOS_Lego_Drone)
 
 # Set any variables required for importing libraries
 SET(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-Kernel)
