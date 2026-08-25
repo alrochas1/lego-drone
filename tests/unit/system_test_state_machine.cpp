@@ -36,6 +36,9 @@ TEST(SystemStateMachineTest, InitToDisarmed)
 {
     SystemStateMachine fsm;
 
+    // Check that the state machine starts in INIT state
+    EXPECT_EQ(fsm.getState(), SystemState::INIT);
+
     SystemInputs inputs{};
     inputs.usb_connected    = false;
     inputs.imu_ok           = true;
@@ -56,12 +59,15 @@ TEST(SystemStateMachineTest, InitToError)
 {
     SystemStateMachine fsm;
 
+    // Check that the state machine starts in INIT state
+    EXPECT_EQ(fsm.getState(), SystemState::INIT);
+
     SystemInputs inputs{};
     inputs.usb_connected    = false;
     inputs.imu_ok           = false;
 
     // Until there is not enough cycles, it should remain in INIT state
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN-1; ++i) {
+    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN-1; ++i) {
         fsm.update_state(inputs);
         EXPECT_EQ(fsm.getState(), SystemState::INIT);
     }
@@ -99,11 +105,12 @@ TEST(SystemStateMachineTest, InitToErrorConsecutiveCycles)
     }
 
     fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::INIT);
+    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
 }
 
 
 // ##################################################
 // ################ DISARMED TESTS ##################
 // ##################################################
+
 

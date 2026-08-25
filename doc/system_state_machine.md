@@ -9,7 +9,7 @@
 
 ## States
 
-![State Machine Diagram](system_state_machine.png)
+![State Machine Diagram](system_state_machine.png =250x250)
 
 ### INIT
 
