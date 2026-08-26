@@ -1,6 +1,7 @@
 // i2c_device.cpp
 #include "drivers/i2c_device.hpp"
 #include "drone_project/config/project_config.hpp"
+#include "drone_project/config/hardware_config.hpp"
 
 #include <cstdio>
 #include <set>

@@ -48,7 +48,7 @@ This will:
 - Compile the project
 - Generate the firmware file
 
-After a successful build, the output file will be located at `./build/src/freeRTOS_Pico_Project.uf2`
+After a successful build, the output file will be located at `./build/src/freeRTOS_Lego_Drone.uf2`
 
 ## 4. Flash the firmware
 

@@ -3,6 +3,7 @@
 #include "tasks/common/task_wrapper.hpp"
 #include "drivers/motor_driver.hpp"
 #include "drone_project/config/project_config.hpp"
+#include "drone_project/config/hardware_config.hpp"
 #include "drone_project/types/control_data.hpp"
 
 class MotorTask : public Task {
