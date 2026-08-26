@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.2.0] - 2026-08-26
+
+### Added
+
+#### Testing and Automation
+- Added GoogleTest and CTest infrastructure. Added GitHub Actions workflow
+- First implementation of units test
+- First implementation of a firmware test
+- `run_tests.sh` script for configuring, building and running the test suite
+- `build_firmware.sh` script for reproducible firmware builds, including a clean-build option
+- Documentation and state diagram for the system state machine
+
+#### Project Structure
+- Reorganized task and driver headers and sources by responsibility
+- Separate hardware pin configuration
+- Separate system task for state management and snapshot publication
+- Updated the CMake configuration to support the reorganized source tree and standalone tests
+
+
+### Known Limitations
+
+- IR task is not yet implemented (commented out in `main.cpp`)
+- RC input pins are not yet configured for a physical receiver
+- Magnetometer support is incomplete in the LSM303D driver
+- Flight control and PID stabilization are not yet implemented
+
+### Future Work
+
+- [ ] Implement RC receiver input handling
+- [ ] Add PID control loops for motor stabilization
+
+
 ## [0.1.0] - 2026-06-02
 
 ### Added
@@ -43,6 +75,7 @@ All notable changes to this project will be documented in this file.
 - IR task not yet implemented (commented out in main.cpp)
 - RC input pins not yet configured
 - Magnetometer support incomplete in LSM303D driver
+- Flight control and PID stabilization are not yet implemented
 
 ### Future Work
 

@@ -8,6 +8,10 @@ as a way to explore embedded software architecture and flight control using inte
 * Modular task architecture
 * Queue-based inter-task communication
 * Centralized configuration
+* System state machine for initialization, safety and flight states
+* Unit tests for system state transitions with GoogleTest, with automated workflows with GitHub Actions
+* Simple Hardware simulation tasks for IMU and RC inputs
+
 
 # How to compile
 
@@ -40,7 +44,7 @@ Open the project root folder.
 
 Select the toolchain `GCC 10.3.1 arm-none-eabi`
 
-Press the **Build** button at the bottom of VSCode.
+Press the **Build** button at the bottom of VSCode, or run `./build_firmware.sh` from the project root.
 
 This will:
 
@@ -50,7 +54,20 @@ This will:
 
 After a successful build, the output file will be located at `./build/src/freeRTOS_Lego_Drone.uf2`
 
-## 4. Flash the firmware
+## 4. Automated checks
+
+GitHub Actions runs the unit tests for pushes to `main` and `devel`, and for pull requests.
+
+### Run the tests
+
+The test script configures a separate CMake build, downloads GoogleTest when needed, builds the unit-test target and
+runs it with CTest:
+
+```
+./run_tests.sh
+```
+
+## 5. Flash the firmware
 
 1. Hold the **BOOTSEL** button on the Raspberry Pi Pico.
 2. Connect it to your PC via USB.
