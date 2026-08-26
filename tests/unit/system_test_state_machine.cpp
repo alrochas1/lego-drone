@@ -4,6 +4,70 @@
 #include "system_state_machine.hpp"
 
 
+// Helper functions for testing the SystemStateMachine
+namespace {
+
+// Returns a SystemInputs object with all inputs set to healthy values
+SystemInputs healthyInputs()
+{
+    SystemInputs inputs{};
+    inputs.imu_ok   = true;
+    inputs.rc_ok = true;
+    return inputs;
+}
+
+// Expects the state machine to remain in the expected state for a given number of cycles
+void expectStateForCycles(
+    SystemStateMachine& fsm,
+    const SystemInputs& inputs,
+    uint32_t cycles,
+    SystemState expectedState)
+{
+    for (uint32_t cycle = 0; cycle < cycles; ++cycle) {
+        fsm.update_state(inputs);
+        EXPECT_EQ(fsm.getState(), expectedState);
+    }
+}
+
+// Expects the state machine to transition from one state to another after a given number of cycles
+void expectTimedTransition(
+    SystemStateMachine& fsm,
+    const SystemInputs& inputs,
+    uint32_t countdown,
+    SystemState stateBeforeTransition,
+    SystemState stateAfterTransition)
+{
+    expectStateForCycles(fsm, inputs, countdown - 1, stateBeforeTransition);
+    fsm.update_state(inputs);
+    EXPECT_EQ(fsm.getState(), stateAfterTransition);
+}
+
+// Helper function to reach the DISARMED state from INIT
+void reachDisarmed(SystemStateMachine& fsm, SystemInputs& inputs)
+{
+    expectStateForCycles(
+        fsm, inputs, config::tasks::INIT_COUNTDOWN - 1, SystemState::INIT);
+    fsm.update_state(inputs);
+    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+}
+
+// Helper function to reach the ARMED state from DISARMED
+void reachArmed(SystemStateMachine& fsm, SystemInputs& inputs)
+{
+    reachDisarmed(fsm, inputs);
+    inputs.throttle = 0.0f;
+    expectStateForCycles(
+        fsm,
+        inputs,
+        config::tasks::THROTTLE_LOW_COUNTDOWN - 1,
+        SystemState::DISARMED);
+    fsm.update_state(inputs);
+    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+}
+
+} // namespace
+
+
 // ##################################################
 // ################## INIT TESTS ####################
 // ##################################################
@@ -38,22 +102,15 @@ TEST(SystemStateMachineTest, InitToDisarmed)
 {
     SystemStateMachine fsm;
 
-    // Check that the state machine starts in INIT state
-    EXPECT_EQ(fsm.getState(), SystemState::INIT);
-
     SystemInputs inputs{};
-    inputs.usb_connected    = false;
-    inputs.imu_ok           = true;
+    inputs.imu_ok = true;
 
-    // Until there is not enough cycles, it should remain in INIT state
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN-1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::INIT);
-    }
-
-    // After enough cycles, it should transition to DISARMED state
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::INIT_COUNTDOWN,
+        SystemState::INIT,
+        SystemState::DISARMED);
 }
 
 
@@ -66,18 +123,12 @@ TEST(SystemStateMachineTest, InitToError)
     EXPECT_EQ(fsm.getState(), SystemState::INIT);
 
     SystemInputs inputs{};
-    inputs.usb_connected    = false;
-    inputs.imu_ok           = false;
-
-    // Until there is not enough cycles, it should remain in INIT state
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN-1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::INIT);
-    }
-
-    // After enough cycles, it should transition to ERROR state
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::IMU_COUNTDOWN,
+        SystemState::INIT,
+        SystemState::ERROR);
 }
 
 
@@ -87,14 +138,10 @@ TEST(SystemStateMachineTest, InitToErrorConsecutiveCycles)
     SystemStateMachine fsm;
 
     SystemInputs inputs{};
-    inputs.usb_connected    = false;
-    inputs.imu_ok           = false;
+    inputs.imu_ok = false;
 
-    // Until there is not enough cycles, it should remain in INIT state
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::INIT);
-    }
+    expectStateForCycles(
+        fsm, inputs, config::tasks::IMU_COUNTDOWN - 1, SystemState::INIT);
 
     // A good IMU reading should reset the counter and keep the state in INIT
     inputs.imu_ok = true;
@@ -103,13 +150,12 @@ TEST(SystemStateMachineTest, InitToErrorConsecutiveCycles)
 
     // New errors should start counting again
     inputs.imu_ok = false;
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::INIT);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::IMU_COUNTDOWN,
+        SystemState::INIT,
+        SystemState::ERROR);
 }
 
 
@@ -121,30 +167,18 @@ TEST(SystemStateMachineTest, InitToErrorConsecutiveCycles)
 TEST(SystemStateMachineTest, DisarmedToArmed)
 {
     SystemStateMachine fsm;
-    SystemInputs inputs{};
-    
-    // Get to DISARMED
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {  // TODO: Check counter
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    SystemInputs inputs = healthyInputs();
+    reachDisarmed(fsm, inputs);
 
     // Check that the state machine remains in DISARMED when RC is not ok
     inputs.rc_ok    = false;
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN-1; ++i) {  // TODO: Check counter
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
+    expectStateForCycles(
+        fsm, inputs, config::tasks::RC_COUNTDOWN - 1, SystemState::DISARMED);
 
     // Check that the state machine remains in DISARMED until RC is ok
     inputs.rc_ok    = true;
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN-1; ++i) {  // TODO: Check counter
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
+    expectStateForCycles(
+        fsm, inputs, config::tasks::RC_COUNTDOWN - 1, SystemState::DISARMED);
 
     // Set throttle high and ensure it stays in DISARMED
     inputs.throttle = 1.0f;
@@ -153,13 +187,12 @@ TEST(SystemStateMachineTest, DisarmedToArmed)
 
     // Check that the state machine transitions to ARMED when throttle is low
     inputs.throttle = 0.0f;
-    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN-1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ARMED);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::THROTTLE_LOW_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::ARMED);
 }
 
 
@@ -167,28 +200,18 @@ TEST(SystemStateMachineTest, DisarmedToArmed)
 TEST(SystemStateMachineTest, DisarmedToFailsafeAfterRcFailure)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    SystemInputs inputs = healthyInputs();
+    reachDisarmed(fsm, inputs);
 
     // Check that the state machine transitions to FAILSAFE when RC fails for enough cycles, even if IMU is ok
     inputs.rc_ok = false;
 
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::FAILSAFE);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::RC_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::FAILSAFE);
 }
 
 
@@ -196,28 +219,18 @@ TEST(SystemStateMachineTest, DisarmedToFailsafeAfterRcFailure)
 TEST(SystemStateMachineTest, DisarmedToErrorAfterImuFailure)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    SystemInputs inputs = healthyInputs();
+    reachDisarmed(fsm, inputs);
 
     // Check that the state machine transitions to ERROR when IMU fails for enough cycles, even if RC is ok
     inputs.imu_ok = false;
 
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::IMU_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::ERROR);
 }
 
 
@@ -225,29 +238,19 @@ TEST(SystemStateMachineTest, DisarmedToErrorAfterImuFailure)
 TEST(SystemStateMachineTest, DisarmedErrorHasPriority)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    SystemInputs inputs = healthyInputs();
+    reachDisarmed(fsm, inputs);
 
     // Both IMU and RC fail simultaneously
     inputs.imu_ok   = false;
     inputs.rc_ok    = false;
 
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::IMU_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::ERROR);
 }
 
 
@@ -255,28 +258,20 @@ TEST(SystemStateMachineTest, DisarmedErrorHasPriority)
 TEST(SystemStateMachineTest, DisarmedFailsafeHasPriority)
 {
     SystemStateMachine fsm;
+    SystemInputs inputs = healthyInputs();
 
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok = true;
-
-    // Reach DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    reachDisarmed(fsm, inputs);
 
     // Check that the state machine transitions to FAILSAFE when RC fails for enough cycles, even if throttle is low
     inputs.rc_ok = false;
     inputs.throttle = 0.0f;
 
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::FAILSAFE);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::RC_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::FAILSAFE);
 }
 
 
@@ -288,23 +283,8 @@ TEST(SystemStateMachineTest, DisarmedFailsafeHasPriority)
 TEST(SystemStateMachineTest, ArmedToFlight)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
-
-    // Get to ARMED
-    inputs.throttle = 0.0f;
-    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+    SystemInputs inputs = healthyInputs();
+    reachArmed(fsm, inputs);
 
     // Check that the state machine transitions to FLIGHT when throttle is increased
     inputs.throttle = 1.0f;
@@ -317,34 +297,18 @@ TEST(SystemStateMachineTest, ArmedToFlight)
 TEST(SystemStateMachineTest, ArmedToFailsafeAfterRcFailure)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
-
-    // Get to ARMED
-    inputs.throttle = 0.0f;
-    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+    SystemInputs inputs = healthyInputs();
+    reachArmed(fsm, inputs);
 
     // Check that the state machine transitions to FAILSAFE when RC fails for enough cycles, even if IMU is ok
     inputs.rc_ok = false;
 
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::ARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::FAILSAFE);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::RC_COUNTDOWN,
+        SystemState::ARMED,
+        SystemState::FAILSAFE);
 }
 
 
@@ -352,34 +316,18 @@ TEST(SystemStateMachineTest, ArmedToFailsafeAfterRcFailure)
 TEST(SystemStateMachineTest, ArmedToErrorAfterImuFailure)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
-
-    // Get to ARMED
-    inputs.throttle = 0.0f;
-    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+    SystemInputs inputs = healthyInputs();
+    reachArmed(fsm, inputs);
 
     // Check that the state machine transitions to ERROR when IMU fails for enough cycles, even if RC is ok
     inputs.imu_ok = false;
 
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN - 1; ++i) {
-        fsm.update_state(inputs);
-        EXPECT_EQ(fsm.getState(), SystemState::ARMED);
-    }
-
-    fsm.update_state(inputs);
-    EXPECT_EQ(fsm.getState(), SystemState::ERROR);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::IMU_COUNTDOWN,
+        SystemState::ARMED,
+        SystemState::ERROR);
 }
 
 
@@ -387,30 +335,17 @@ TEST(SystemStateMachineTest, ArmedToErrorAfterImuFailure)
 TEST(SystemStateMachineTest, ArmedToDisarmedWhenThrottleLow)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
-
-    // Get to ARMED
-    inputs.throttle = 0.0f;
-    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+    SystemInputs inputs = healthyInputs();
+    reachArmed(fsm, inputs);
 
     // Check that the state machine transitions to FAILSAFE when RC fails
     inputs.rc_ok = false;
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::FAILSAFE);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::RC_COUNTDOWN,
+        SystemState::ARMED,
+        SystemState::FAILSAFE);
 
     // Check that the state machine transitions to DISARMED when RC recovers and throttle is low
     inputs.rc_ok = true;
@@ -440,24 +375,17 @@ TEST(SystemStateMachineTest, ArmedToDisarmedWhenThrottleLow)
 TEST(SystemStateMachineTest, FailsafeToDisarmedWhenInputsRecover)
 {
     SystemStateMachine fsm;
-
-    SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok    = true;
-    inputs.throttle = 0.0f;
-
-    // Get to DISARMED
-    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+    SystemInputs inputs = healthyInputs();
+    reachDisarmed(fsm, inputs);
 
     // Get to FAILSAFE
     inputs.rc_ok = false;
-    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN; ++i) {
-        fsm.update_state(inputs);
-    }
-    ASSERT_EQ(fsm.getState(), SystemState::FAILSAFE);
+    expectTimedTransition(
+        fsm,
+        inputs,
+        config::tasks::RC_COUNTDOWN,
+        SystemState::DISARMED,
+        SystemState::FAILSAFE);
 
     // Check that the state machine remains in FAILSAFE when only one of the inputs recovers
     inputs.rc_ok = true;
