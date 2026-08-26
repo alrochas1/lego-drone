@@ -34,7 +34,7 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
             init_count_++;
             imu_fail_count_ = 0;    // reset
 
-            if(init_count_ >= tasks::INIT_COUNTDOWN)
+            if (init_count_ >= tasks::INIT_COUNTDOWN)
             {
                 state_ = SystemState::DISARMED;
                 init_count_ = 0;        // reset
@@ -80,12 +80,17 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
         {
             imu_fail_count_ = 0;  // reset when condition clears
         }
+
+        if (state_ == SystemState::ERROR)
+        {
+            break;
+        }
         
         if (!in.rc_ok)
         {
             rc_fail_count_++;
 
-            if (rc_fail_count_ >= tasks::RC_COUNTDOWN)
+            if (in.imu_ok && rc_fail_count_ >= tasks::RC_COUNTDOWN)
             {
                 state_ = SystemState::FAILSAFE;
                 rc_fail_count_ = 0;  // reset
@@ -95,9 +100,25 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
         {
             rc_fail_count_ = 0;  // reset when condition clears
         }
-        
-        if (in.throttle < 0.05f) {
-            state_ = SystemState::ARMED;
+
+        if (state_ == SystemState::FAILSAFE)
+        {
+            break;
+        }
+
+        if (in.imu_ok && in.rc_ok && in.throttle < 0.05f)
+        {
+            throttle_low_count_++;
+
+            if (throttle_low_count_ >= tasks::THROTTLE_LOW_COUNTDOWN)
+            {
+                state_ = SystemState::ARMED;
+                throttle_low_count_ = 0;  // reset
+            }
+        }
+        else
+        {
+            throttle_low_count_ = 0;  // reset when condition clears
         }
         // If no transition, stay in DISARMED
         break;

@@ -127,7 +127,7 @@ TEST(SystemStateMachineTest, DisarmedToArmed)
     inputs.imu_ok   = true;
     inputs.rc_ok    = true;
 
-    for (uint32_t i = 0; i < config::tasks::IMU_COUNTDOWN; ++i) {  // TODO: Check counter
+    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {  // TODO: Check counter
         fsm.update_state(inputs);
     }
     ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
@@ -383,15 +383,48 @@ TEST(SystemStateMachineTest, ArmedToErrorAfterImuFailure)
 }
 
 
-// ARMED
-//  └── ArmedToDisarmedWhenThrottleLow (this should check transition ARMED -> FAILSAFE -> DISARMED)
+// Test that the state machine transitions from ARMED to DISARMED when throttle is low
+TEST(SystemStateMachineTest, ArmedToDisarmedWhenThrottleLow)
+{
+    SystemStateMachine fsm;
+
+    SystemInputs inputs{};
+    inputs.imu_ok   = true;
+    inputs.rc_ok    = true;
+
+    // Get to DISARMED
+    for (uint32_t i = 0; i < config::tasks::INIT_COUNTDOWN; ++i) {
+        fsm.update_state(inputs);
+    }
+    ASSERT_EQ(fsm.getState(), SystemState::DISARMED);
+
+    // Get to ARMED
+    inputs.throttle = 0.0f;
+    for (uint32_t i = 0; i < config::tasks::THROTTLE_LOW_COUNTDOWN; ++i) {
+        fsm.update_state(inputs);
+    }
+    ASSERT_EQ(fsm.getState(), SystemState::ARMED);
+
+    // Check that the state machine transitions to FAILSAFE when RC fails
+    inputs.rc_ok = false;
+    for (uint32_t i = 0; i < config::tasks::RC_COUNTDOWN; ++i) {
+        fsm.update_state(inputs);
+    }
+    ASSERT_EQ(fsm.getState(), SystemState::FAILSAFE);
+
+    // Check that the state machine transitions to DISARMED when RC recovers and throttle is low
+    inputs.rc_ok = true;
+    inputs.throttle = 0.0f;
+    fsm.update_state(inputs);
+    EXPECT_EQ(fsm.getState(), SystemState::DISARMED);
+}
 
 
 // ##################################################
 // ############### FLIGHT TESTS #####################
 // ##################################################
 
-// FLIGHT
+// FLIGHT // TODO: Implement
 //  ├── FlightRemainsWithShortLowThrottle
 //  ├── FlightToArmedAfterLowThrottle
 //  ├── FlightLowThrottleRequiresConsecutiveCycles
