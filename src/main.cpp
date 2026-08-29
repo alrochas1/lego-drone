@@ -113,11 +113,11 @@ int drone_main() {
     }   
 
     Task* rc_task = nullptr;
-    if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) {
+    /*if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) { */
         rc_task = new RCSimTask(queues.rc_queue);
-    } else {
+    /*} else {
         // rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
-    }
+    }*/
 
     // Control task
     ControlTask control_task(queues.snapshot_queue, queues.motor_queue);

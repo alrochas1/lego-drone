@@ -98,16 +98,16 @@ AccelData LSM303D_Accel::read_accel() {
         return AccelData();
     }
     
-    // Convertir datos (little endian, complemento a 2)
+    // Convert data (little endian, 2's complement)
     int16_t raw_x = static_cast<int16_t>(buffer[0]) | (static_cast<int16_t>(buffer[1]) << 8);
     int16_t raw_y = static_cast<int16_t>(buffer[2]) | (static_cast<int16_t>(buffer[3]) << 8);
     int16_t raw_z = static_cast<int16_t>(buffer[4]) | (static_cast<int16_t>(buffer[5]) << 8);
     
     // sensitivity_ is in g/LSB, multiply by 9.80665 for m/s²
     Vector3f linear_acceleration(
-        static_cast<float>(raw_x),// * sensitivity_ * 9.80665f,
-        static_cast<float>(raw_y),// * sensitivity_ * 9.80665f,
-        static_cast<float>(raw_z)// * sensitivity_ * 9.80665f
+        static_cast<float>(raw_x) * sensitivity_ * 9.80665f,
+        static_cast<float>(raw_y) * sensitivity_ * 9.80665f,
+        static_cast<float>(raw_z) * sensitivity_ * 9.80665f
     );
     
     return AccelData(linear_acceleration, to_ms_since_boot(get_absolute_time()));
