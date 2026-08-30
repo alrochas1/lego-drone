@@ -3,12 +3,12 @@
 #include "FreeRTOS.h"
 #include <queue.h>
 
-#include <drone_project/types/sensor_data.hpp>
-#include "drone_project/config/project_config.hpp"
+#include <types/sensor_data.hpp>
+#include "config/project_config.hpp"
 
 #include "tasks/common/task_wrapper.hpp"
-#include <drivers/l3gd20.hpp>
-#include <drivers/lsm303d_accel.hpp>
+#include <drivers/sensors/l3gd20.hpp>
+#include <drivers/sensors/lsm303d_accel.hpp>
 
 
 class IMUTask : public I2CSensorTask {

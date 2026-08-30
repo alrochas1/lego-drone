@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "drone_project/types/system_data.hpp"
+#include "types/system_data.hpp"
 
 class SystemStateMachine
 {

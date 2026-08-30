@@ -1,7 +1,7 @@
 // system_state_machine.cpp
 
 #include "system_state_machine.hpp"
-#include "drone_project/config/project_config.hpp"
+#include "config/project_config.hpp"
 
 using namespace config;
 

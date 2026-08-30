@@ -1,7 +1,7 @@
 // led_task.cpp
 #include "tasks/led/led_task.hpp"
-#include "drone_project/config/project_config.hpp"
-#include "drone_project/config/hardware_config.hpp"
+#include "config/project_config.hpp"
+#include "config/hardware_config.hpp"
 #include <cstdio>
 
 using namespace config;

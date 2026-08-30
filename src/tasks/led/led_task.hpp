@@ -6,8 +6,8 @@
 #include <queue.h>
 
 #include "tasks/common/task_wrapper.hpp"
-#include <drone_project/config/project_config.hpp>
-#include <drone_project/types/system_data.hpp>
+#include <config/project_config.hpp>
+#include <types/system_data.hpp>
 
 
 class LedTask : public Task {

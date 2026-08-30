@@ -1,6 +1,6 @@
 // log_task.cpp
 #include "tasks/log/log_task.hpp"
-#include "drone_project/config/project_config.hpp"
+#include "config/project_config.hpp"
 #include <cstdio>
 
 using namespace config;

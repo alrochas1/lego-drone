@@ -1,6 +1,6 @@
 // system_task.cpp
 #include "system_task.hpp"
-#include "drone_project/config/hardware_config.hpp"
+#include "config/hardware_config.hpp"
 
 #define SIM_BATTERY 0 // For testing without battery (USB mode). Be careful if the motors are connected!
 

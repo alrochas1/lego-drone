@@ -1,5 +1,5 @@
 // l3gd20.cpp
-#include "drivers/l3gd20.hpp"
+#include "l3gd20.hpp"
 #include <cstdio>
 #include <array>
 

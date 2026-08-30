@@ -1,8 +1,8 @@
 // lsm303d_accel.hpp
 #pragma once
-#include "i2c_device.hpp"
-#include <drone_project/types/sensor_data.hpp>
-#include "drone_project/config/project_config.hpp"
+#include "drivers/bus/i2c_device.hpp"
+#include <types/sensor_data.hpp>
+#include "config/project_config.hpp"
 
 class LSM303D_Accel : public I2CDevice {
 public:

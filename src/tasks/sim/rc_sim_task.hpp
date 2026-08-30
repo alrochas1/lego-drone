@@ -1,7 +1,7 @@
 // rc_sim_task.hpp
 #pragma once
 #include "tasks/common/task_wrapper.hpp"
-#include "drone_project/types/comms_data.hpp"
+#include "types/comms_data.hpp"
 #include <queue.h>
 
 class RCSimTask : public Task {

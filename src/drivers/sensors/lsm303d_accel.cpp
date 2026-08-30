@@ -1,4 +1,4 @@
-#include "drivers/lsm303d_accel.hpp"
+#include "lsm303d_accel.hpp"
 #include <cstdio>
 #include <array>
 

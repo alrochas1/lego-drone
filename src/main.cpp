@@ -5,9 +5,9 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-#include "drone_project/config/project_config.hpp"
-#include "drone_project/types/system_data.hpp"
-#include "drone_project/types/freeRTOS_data.hpp"
+#include "config/project_config.hpp"
+#include "types/system_data.hpp"
+#include "types/freeRTOS_data.hpp"
 
 #include "tasks/system/system_task.hpp"
 

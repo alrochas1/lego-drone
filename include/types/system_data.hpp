@@ -1,8 +1,8 @@
 // system_data.hpp
 
 #pragma once
-#include "drone_project/types/sensor_data.hpp"
-#include "drone_project/types/comms_data.hpp"
+#include "types/sensor_data.hpp"
+#include "types/comms_data.hpp"
 
 // SYSTEM STATES
 enum class SystemState {

@@ -5,8 +5,8 @@
 #include <queue.h>
 
 #include "tasks/common/task_wrapper.hpp"
-#include "drone_project/types/sensor_data.hpp"
-#include "drone_project/config/project_config.hpp"
+#include "types/sensor_data.hpp"
+#include "config/project_config.hpp"
 
 class IMUSimTask : public Task {
 private:
