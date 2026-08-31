@@ -85,8 +85,8 @@ void IMUTask::run() {
 
         // Send data to other tasks
         // TODO: Add error handling
-        xQueueSend(data_queue_,     &sensor_data, 0);
-        xQueueSend(status_queue_,   &status_data, 0);
+        xQueueOverwrite(data_queue_,     &sensor_data);
+        xQueueOverwrite(status_queue_,   &status_data);
 
         delay(tasks::IMU_SAMPLE_MS);
     }
