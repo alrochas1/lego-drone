@@ -109,6 +109,7 @@ struct IMUOrientation {
 
 
 // My IMU is rotated 90º around the Z axis, so the mapping is as follows:
+// FIXME: Correct this
 constexpr IMUOrientation imu_orientation{
     .forward = {SensorAxis::Y, +1},
     .right   = {SensorAxis::X, -1},
