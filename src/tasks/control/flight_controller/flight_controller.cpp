@@ -16,6 +16,7 @@ constexpr float TWO_PI = 6.28318530718f;
 }
 
 // Update the flight controller with the latest system snapshot
+// FIXME: Separate the estimator and the controller into different classes
 RCCommand FlightController::update(const IMUData& imu, const RCCommand& rc)
 {
     // Update the time delta based on the latest IMU timestamp
@@ -152,6 +153,8 @@ RCCommand FlightController::attitude_controller(
                    -MAX_YAW_RATE,
                    MAX_YAW_RATE);
 
+    desired_rate.throttle = desired_state.throttle;
+
     return desired_rate;
 }
 
@@ -225,6 +228,8 @@ RCCommand FlightController::rate_controller(
         std::clamp(control.yaw,
                    -OUTPUT_LIMIT,
                    OUTPUT_LIMIT);
+
+    control.throttle = desired_rate.throttle;
 
     return control;
 }
