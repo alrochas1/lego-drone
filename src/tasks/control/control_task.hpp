@@ -7,29 +7,22 @@
 #include "types/comms_data.hpp"
 #include "types/control_data.hpp"
 
-
+#include "flight_controller/flight_controller.hpp"
+#include "motor_mixer/motor_mixer.hpp"
 
 class ControlTask : public Task {
 private:
-    QueueHandle_t imu_data_queue_;
-    QueueHandle_t rc_data_queue_;
+    QueueHandle_t imu_queue_;
+    QueueHandle_t rc_queue_;
     QueueHandle_t motor_queue_;
     
-    // TODO: PID controllers for each axis (placeholder for future implementation)
-    DroneController pid_controllers_;
+    FlightController    flight_controller_;
+    MotorMixer          motor_mixer_;
 
-    // TODO: Implement inclination estimation logic
-    Inclination estimate_state(const IMUData& imu);
-
-    // TODO: Implement PID control logic
-    MotorCommands get_motor_commands(const Inclination& current_state,
-                                    const RCCommand& desired_state);
-
-    MotorCommands get_pid_commands(const Inclination& current_state,
-                                  const RCCommand& desired_state);
+    RCCommand last_rc_ = {};
 
 public:
-    ControlTask(QueueHandle_t imu_data_q, QueueHandle_t rc_data_q, QueueHandle_t motor_q);
+    ControlTask(QueueHandle_t imu_q, QueueHandle_t rc_q, QueueHandle_t motor_q);
 
 protected:
     void run() override;

@@ -106,7 +106,7 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
             break;
         }
 
-        if (in.imu_ok && in.rc_ok && in.throttle < 0.05f)
+        if (in.imu_ok && in.rc_ok && in.throttle < 0.05f) // Move 0.05f to config
         {
             throttle_low_count_++;
 
@@ -204,7 +204,7 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
             imu_fail_count_ = 0;  // reset when condition clears
         }
         
-        if (in.throttle < 0.05f) 
+        if (in.throttle < 0.05f) // Move 0.05f to config
         {
             throttle_low_count_++;
 

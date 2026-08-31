@@ -3,75 +3,44 @@
 
 using namespace config;
 
-ControlTask::ControlTask(QueueHandle_t imu_data_q, QueueHandle_t rc_data_q, QueueHandle_t motor_q)
+ControlTask::ControlTask(QueueHandle_t imu_q, QueueHandle_t rc_q, QueueHandle_t motor_q)
     : Task("CONTROL", tasks::CONTROL_STACK_SIZE, tasks::CONTROL_PRIORITY),
-      imu_data_queue_(imu_data_q),
-      rc_data_queue_(rc_data_q),
+      imu_queue_(imu_q),
+      rc_queue_(rc_q),
       motor_queue_(motor_q) {
     
     printf("[CONTROL] Task created\n");
 }
 
-Inclination ControlTask::estimate_state(const IMUData& imu) {
-    Inclination inclination{};
-    
-    // TODO: Implement inclination estimation from IMU
-    
-    inclination.roll = 0.0f;   // Placeholder
-    inclination.pitch = 0.0f;  // Placeholder
-    inclination.yaw = 0.0f;    // Placeholder
-    
-    return inclination;
-}
-
-MotorCommands ControlTask::get_motor_commands(const Inclination& current_state,
-                                              const RCCommand& desired_state) {
-    MotorCommands commands{};
-
-    if (!desired_state.valid) {
-        commands.m1 = 0;
-        commands.m2 = 0;
-        commands.m3 = 0;
-        commands.m4 = 0;
-        return commands;
-    }
-
-    commands = get_pid_commands(current_state, desired_state);
-    return commands;
-}
-
-MotorCommands ControlTask::get_pid_commands(const Inclination& current_state, const RCCommand& desired_state) {
-    MotorCommands commands{};
-
-    // TODO: Implement PID control logic
-    // Placeholder
-    if(desired_state.throttle > 0.1f) {
-        commands.m1 = static_cast<uint16_t>(1023*0.3); // Example: 30% throttle
-        commands.m3 = static_cast<uint16_t>(1023*0.3); // Example: 30% throttle
-    } else {
-        commands.m1 = 0; // Motors off
-        commands.m3 = 0; // Motors off
-    }
-    commands.m2 = 0;  // Placeholder
-    commands.m4 = 0;  // Placeholder
-    
-    return commands;
-}
 
 void ControlTask::run() {
+
     IMUData imu_data{};
-    RCCommand rc_command{};
+    RCCommand rc_data{};
     MotorCommands motor_commands{};
     
     printf("[CONTROL] Task started - Update interval: %lu ms\n", tasks::CONTROL_UPDATE_MS);
     
     while (true) {
-        bool has_imu = xQueueReceive(imu_data_queue_, &imu_data, 0) == pdPASS;
-        bool has_rc = xQueueReceive(rc_data_queue_, &rc_command, 0) == pdPASS;
 
-        if (has_imu && has_rc) {
-            Inclination current_state = estimate_state(imu_data);
-            motor_commands = get_motor_commands(current_state, rc_command);
+        // Get the latest IMU and RC data from the queues
+        const bool imu_ready = xQueueReceive(imu_queue_, &imu_data, 0) == pdPASS;
+        const bool rc_ready  = xQueueReceive(rc_queue_,  &rc_data,  0) == pdPASS;
+
+        // Save the last valid RC command for use in control calculations
+        if(rc_ready) {
+            last_rc_ = rc_data;
+        }
+
+        if (imu_ready) {
+            
+            // Estimate the current state and compute control commands
+            RCCommand control = flight_controller_.update(imu_data, last_rc_);
+            
+            // Convert control outputs into motor commands
+            motor_commands = motor_mixer_.mix_motors(control);
+            
+            // Send motor commands to the motor task
             xQueueOverwrite(motor_queue_, &motor_commands);
         }
         

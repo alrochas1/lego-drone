@@ -80,8 +80,37 @@ struct IMUData {
     }
 };
 
+
+// IMU status data for monitoring sensor health and data validity
 struct IMUStatus {
     bool     valid{false};
     uint32_t sequence_number{0};
     uint32_t timestamp_ms{0};
+};
+
+
+// IMU configuration for sensor orientation and axis mapping
+enum class SensorAxis {
+    X,
+    Y,
+    Z
+};
+
+struct AxisMapping {
+    SensorAxis source;
+    int8_t sign;
+};
+
+struct IMUOrientation {
+    AxisMapping forward;
+    AxisMapping right;
+    AxisMapping down;
+};
+
+
+// My IMU is rotated 90º around the Z axis, so the mapping is as follows:
+constexpr IMUOrientation imu_orientation{
+    .forward = {SensorAxis::Y, +1},
+    .right   = {SensorAxis::X, -1},
+    .down    = {SensorAxis::Z, +1}
 };

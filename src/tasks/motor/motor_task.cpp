@@ -27,10 +27,10 @@ void MotorTask::run() {
     while (true) {
         // Read motor commands from queue
         if (xQueuePeek(motor_queue_, &commands, 0) == pdPASS) {
-            m1_.set_power(commands.m1);
-            m2_.set_power(commands.m2);
-            m3_.set_power(commands.m3);
-            m4_.set_power(commands.m4);
+            m1_.set_power(commands.motor[0]);
+            m2_.set_power(commands.motor[1]);
+            m3_.set_power(commands.motor[2]);
+            m4_.set_power(commands.motor[3]);
         }
 
         delay(tasks::MOTOR_UPDATE_MS);

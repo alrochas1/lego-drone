@@ -2,6 +2,8 @@
 
 #pragma once
 
+constexpr uint8_t N_MOTORS = 4;
+
 struct PIDController {
     // Placeholder for PID controller implementation
 };
@@ -20,8 +22,6 @@ struct DroneController {
 };
 
 struct MotorCommands {
-    uint16_t m1;  // Motor 1 power (0-1023)
-    uint16_t m2;  // Motor 2 power (0-1023)
-    uint16_t m3;  // Motor 3 power (0-1023)
-    uint16_t m4;  // Motor 4 power (0-1023)
+    uint8_t  num_motors = N_MOTORS;  // Number of motors
+    uint16_t motor[N_MOTORS];        // Motor power (0-1023)
 };
