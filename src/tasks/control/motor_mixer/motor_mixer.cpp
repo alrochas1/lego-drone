@@ -7,49 +7,42 @@ MotorCommands MotorMixer::mix_motors(
     const RCCommand& control)
 {
     MotorCommands commands{};
+    float m[4]{};
 
     auto throttle = control.throttle;
 
-    float m1 =
+    m[0] =
         throttle +
         control.roll +
         control.pitch -
         control.yaw;
 
-    float m2 =
+    m[1] =
         throttle -
         control.roll +
         control.pitch +
         control.yaw;
 
-    float m3 =
+    m[2] =
         throttle +
         control.roll -
         control.pitch +
         control.yaw;
 
-    float m4 =
+    m[3] =
         throttle -
         control.roll -
         control.pitch -
         control.yaw;
 
-    m1 = std::clamp(m1, 0.0f, 1.0f);
-    m2 = std::clamp(m2, 0.0f, 1.0f);
-    m3 = std::clamp(m3, 0.0f, 1.0f);
-    m4 = std::clamp(m4, 0.0f, 1.0f);
+    m[0] = std::clamp(m[0], 0.0f, 1.0f);
+    m[1] = std::clamp(m[1], 0.0f, 1.0f);
+    m[2] = std::clamp(m[2], 0.0f, 1.0f);
+    m[3] = std::clamp(m[3], 0.0f, 1.0f);
 
-    commands.m1 =
-        static_cast<uint16_t>(m1 * 1023.0f);
-
-    commands.m2 =
-        static_cast<uint16_t>(m2 * 1023.0f);
-
-    commands.m3 =
-        static_cast<uint16_t>(m3 * 1023.0f);
-
-    commands.m4 =
-        static_cast<uint16_t>(m4 * 1023.0f);
+    for (int i = 0; i < 4; ++i) {
+        commands.motor[i] = static_cast<uint16_t>(m[i] * 1023.0f);
+    }
 
     return commands;
 }

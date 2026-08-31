@@ -45,8 +45,11 @@ void LogTask::run() {
         // Log motor commands (this shouldnt be here, is for debugging)
         MotorCommands motor_cmds;
         if (xQueuePeek(motor_queue_, &motor_cmds, 0) == pdPASS) {
-            printf("[MOTORS] M1=%u M2=%u M3=%u M4=%u\n",
-                motor_cmds.m1, motor_cmds.m2, motor_cmds.m3, motor_cmds.m4);
+            printf("[MOTORS]");
+            for (uint8_t i = 0; i < motor_cmds.num_motors; ++i) {
+                printf(" M%u=%u", static_cast<unsigned>(i + 1), motor_cmds.motor[i]);
+            }
+            printf("\n");
         }
 
         printf("=======================\n");

@@ -19,10 +19,10 @@ TEST(ControlTest, ZeroThrottleProducesZeroControl)
     auto control = controller.update(imu, rc);
     auto motor_commands = mixer.mix_motors(control);
 
-    EXPECT_FLOAT_EQ(motor_commands.m1, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m2, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m3, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m4, 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
 
     // Check that a non-zero IMU reading produces zero control outputs with throttle at zero
     imu.gyro.angular_velocity.x = 0.1f;
@@ -38,24 +38,24 @@ TEST(ControlTest, ZeroThrottleProducesZeroControl)
     control = controller.update(imu, rc);
     motor_commands = mixer.mix_motors(control);
 
-    EXPECT_FLOAT_EQ(motor_commands.m1, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m2, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m3, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m4, 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
 
     // Check that a non-zero RC input produces zero control outputs with throttle at zero
-    rc.throttle = 0.0f;
-    rc.roll = 0.5f;
-    rc.pitch = -0.5f;
-    rc.yaw = 0.2f;
+    rc.throttle =  0.0f;
+    rc.roll     =  0.5f;
+    rc.pitch    = -0.5f;
+    rc.yaw      =  0.2f;
 
     imu.gyro.timestamp_ms += 10; // FIX this
 
     control = controller.update(imu, rc);
     motor_commands = mixer.mix_motors(control);
 
-    EXPECT_FLOAT_EQ(motor_commands.m1, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m2, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m3, 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.m4, 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
+    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
 }
