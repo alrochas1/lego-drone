@@ -32,6 +32,12 @@ bool IMUTask::initialize_gyro() {
 void IMUTask::process_gyro_data(IMUData *sensor_data) {
     auto gyro_data = gyro_.read_gyro();
 
+    // Rotate data to body frame
+    gyro_data.angular_velocity = 
+        transform_to_body_frame(
+            gyro_data.angular_velocity,
+            imu_orientation);
+
     sensor_data->gyro = gyro_data; 
 }
 
@@ -53,10 +59,37 @@ bool IMUTask::initialize_accel() {
 void IMUTask::process_accel_data(IMUData *sensor_data) {
     auto accel_data = accel_.read_accel();
 
+    // Rotate data to body frame
+    accel_data.linear_acceleration = 
+        transform_to_body_frame(
+            accel_data.linear_acceleration,
+            imu_orientation);
+
     sensor_data->accel = accel_data;   
 }
 
 // -------
+
+Vector3f IMUTask::transform_to_body_frame(
+    const Vector3f& sensor,
+    const IMUOrientation& orientation)
+{
+    auto get_axis = [&](SensorAxis axis) {
+        switch (axis) {
+            case SensorAxis::X: return sensor.x;
+            case SensorAxis::Y: return sensor.y;
+            case SensorAxis::Z: return sensor.z;
+        }
+
+        return 0.0f;
+    };
+
+    return {
+        get_axis(orientation.forward.source) * orientation.forward.sign,
+        get_axis(orientation.right.source)   * orientation.right.sign,
+        get_axis(orientation.down.source)    * orientation.down.sign
+    };
+}
 
 void IMUTask::run() {
     printf("[IMU] Task started - Sample rate: %lu ms\n", tasks::IMU_SAMPLE_MS);

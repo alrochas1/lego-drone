@@ -21,6 +21,11 @@ private:
     bool initialize_accel();
     void process_gyro_data(IMUData *sensor_data);
     void process_accel_data(IMUData *sensor_data);
+
+    Vector3f transform_to_body_frame(
+        const Vector3f& sensor,
+        const IMUOrientation& orientation);
+
     // void handle_read_error();
 
 public:

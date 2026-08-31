@@ -16,6 +16,7 @@ TEST(ControlTest, ZeroThrottleProducesZeroControl)
 
     uint32_t timestamp_ms = 0;
 
+    // Check that zero throttle and IMU produces zero control outputs
     auto control = controller.update(imu, rc);
     auto motor_commands = mixer.mix_motors(control);
 
@@ -59,3 +60,19 @@ TEST(ControlTest, ZeroThrottleProducesZeroControl)
     EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
     EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
 }
+
+
+// IMU quieta + throttle X
+//         → todos aproximadamente X
+
+// IMU inclinada en roll
+//         → diferencia M1/M2/M3/M4 correcta
+
+// IMU inclinada en pitch
+//         → diferencia correcta
+
+// gyro con velocidad de giro
+//         → corrección contraria al giro
+
+// RC roll positivo
+//         → desired roll rate positivo

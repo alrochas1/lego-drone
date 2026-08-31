@@ -11,6 +11,10 @@ MotorCommands MotorMixer::mix_motors(
 
     auto throttle = control.throttle;
 
+    if (throttle <= throttle_min_) {
+        return commands;
+    }
+
     m[0] =
         throttle +
         control.roll +

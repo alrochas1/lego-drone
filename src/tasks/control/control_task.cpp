@@ -37,7 +37,7 @@ void ControlTask::run() {
             // Estimate the current state and compute control commands
             RCCommand control = flight_controller_.update(imu_data, last_rc_);
             
-            // Calculate motor commands using PID controller
+            // Convert control outputs into motor commands
             motor_commands = motor_mixer_.mix_motors(control);
             
             // Send motor commands to the motor task
