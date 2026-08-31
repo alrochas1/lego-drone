@@ -10,9 +10,15 @@ struct SystemQueues {
     QueueHandle_t snapshot_queue;
 
     // Imput Queues
-    QueueHandle_t rc_queue;
-    QueueHandle_t imu_queue;
+    QueueHandle_t rc_data;
+    QueueHandle_t imu_data;
+
+    QueueHandle_t rc_status;
+    QueueHandle_t imu_status;
         
     // Output Queues
     QueueHandle_t motor_queue;
+
+    // Logging queue
+    QueueHandle_t log_queue;
 };

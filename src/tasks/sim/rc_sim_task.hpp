@@ -6,7 +6,8 @@
 
 class RCSimTask : public Task {
 private:
-    QueueHandle_t rc_queue_;
+    QueueHandle_t data_queue_;
+    QueueHandle_t status_queue_;
 
     RCCommand last_cmd_;
 
@@ -17,7 +18,7 @@ private:
     uint32_t last_time_ = 0;
 
 public:
-    RCSimTask(QueueHandle_t queue);
+    RCSimTask(QueueHandle_t data_queue, QueueHandle_t status_queue);
 
 protected:
     void run() override;

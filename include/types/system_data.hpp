@@ -1,6 +1,10 @@
 // system_data.hpp
 
 #pragma once
+
+#include <cstdint>
+#include <string>
+
 #include "types/sensor_data.hpp"
 #include "types/comms_data.hpp"
 
@@ -11,8 +15,8 @@ enum class SystemState {
     DISARMED,   // System is on battery but not ready for flight (motors off) - default state after init with battery
     ARMED,      // System is ready for flight (can take off, motors on)
     FLIGHT,     // System is in flight (motors on, not in failsafe)
-    FAILSAFE,
-    ERROR
+    FAILSAFE,   // System is in failsafe mode (motors on, but must land immediately)
+    ERROR       // System is in error state (motors off, must land immediately)
 };
 
 struct SystemInputs {
@@ -31,10 +35,14 @@ enum class RunMode {
 };
 
 struct SystemSnapshot {
-    uint32_t timestamp_ms;
+    uint32_t    timestamp_ms;
     SystemState state;
-    SensorData imu;
-    RCCommand rc;
+    IMUStatus   imu;
+    RCStatus    rc;
 };
 
+struct LogData {
+    std::string message;
+    uint32_t    timestamp_ms;
+};
 

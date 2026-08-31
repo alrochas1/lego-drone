@@ -35,20 +35,29 @@ SystemQueues create_queues() {
     queues.snapshot_queue = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(SystemSnapshot));
 
     // Imput Queues
-    queues.rc_queue     = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(RCCommand));
-    queues.imu_queue    = xQueueCreate(queues::SENSOR_QUEUE_LENGTH, sizeof(SensorData));
+    queues.rc_data     = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(RCCommand));
+    queues.imu_data    = xQueueCreate(queues::SENSOR_QUEUE_LENGTH, sizeof(IMUData));
+    queues.rc_status   = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(RCStatus));
+    queues.imu_status  = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(IMUStatus));
     
     // Control output queue
-    queues.motor_queue  = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(MotorCommands));
+    queues.motor_queue = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(MotorCommands));
+
+    // Logging queue
+    queues.log_queue   = xQueueCreate(queues::LOG_QUEUE_LENGTH,    sizeof(LogData));
 
     // Add error handling for queue creation
     if (!queues.snapshot_queue ||
-        !queues.rc_queue ||
-        !queues.imu_queue ||
-        !queues.motor_queue) {
-    printf("QUEUE INIT FAILED\n");
-    while(true);
-}
+        !queues.rc_data ||
+        !queues.imu_data ||
+        !queues.rc_status ||
+        !queues.imu_status ||
+        !queues.motor_queue ||
+        !queues.log_queue) 
+    {
+        printf("QUEUE INIT FAILED\n");
+        while(true);
+    }
     
     return queues;
 }
@@ -89,38 +98,36 @@ int start_tasks(bool success) {
 int drone_main() {
 
     // For testing individual tasks without the full setup
-    RunMode running_mode = RunMode::IMU_SIM;
+    RunMode running_mode = RunMode::FLIGHT;
     
     common_main();
 
-    
     // Create queues
     SystemQueues queues = create_queues();
 
-
     // Create tasks (TODO: Add structure)
-    SystemStateTask system_state_task(queues.imu_queue, queues.rc_queue, queues.snapshot_queue);
+    SystemStateTask system_state_task(queues.imu_status, queues.rc_status, queues.snapshot_queue);
     LedTask led_task(queues.snapshot_queue);
     LogTask log_task(queues.snapshot_queue, queues.motor_queue);
 
     // Imput tasks (TODO: Improve this)
     Task* imu_task = nullptr;
     if (running_mode == RunMode::IMU_SIM || running_mode == RunMode::SIMULATION) {
-        imu_task = new IMUSimTask(queues.imu_queue);
-    } 
+        imu_task = new IMUSimTask(queues.imu_data, queues.imu_status);
+    }
     else {
-        imu_task = new IMUTask(queues.imu_queue);
-    }   
+        imu_task = new IMUTask(queues.imu_data, queues.imu_status);
+    }
 
     Task* rc_task = nullptr;
     /*if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) { */
-        rc_task = new RCSimTask(queues.rc_queue);
+        rc_task = new RCSimTask(queues.rc_data, queues.rc_status);
     /*} else {
-        // rc_task = new IRTask(pins::IR_PIN, queues.rc_queue);
+        // rc_task = new IRTask(pins::IR_PIN, queues.rc_data);
     }*/
 
     // Control task
-    ControlTask control_task(queues.snapshot_queue, queues.motor_queue);
+    ControlTask control_task(queues.imu_data, queues.rc_data, queues.motor_queue);
     MotorTask motor_task(queues.motor_queue);
 
 

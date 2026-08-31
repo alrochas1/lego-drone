@@ -11,24 +11,25 @@
 
 class ControlTask : public Task {
 private:
-    QueueHandle_t snapshot_queue_;
+    QueueHandle_t imu_data_queue_;
+    QueueHandle_t rc_data_queue_;
     QueueHandle_t motor_queue_;
     
     // TODO: PID controllers for each axis (placeholder for future implementation)
     DroneController pid_controllers_;
-    
-    // TODO: Implement inclination estimation logic
-    Inclination estimate_state(const SensorData& imu);
-    
-    // TODO: Implement PID control logic
-    MotorCommands get_motor_commands(const Inclination& current_state, 
-                                        const SystemSnapshot& state);
 
-    MotorCommands get_pid_commands(const Inclination& current_state, 
-                                        const RCCommand& desired_state);
+    // TODO: Implement inclination estimation logic
+    Inclination estimate_state(const IMUData& imu);
+
+    // TODO: Implement PID control logic
+    MotorCommands get_motor_commands(const Inclination& current_state,
+                                    const RCCommand& desired_state);
+
+    MotorCommands get_pid_commands(const Inclination& current_state,
+                                  const RCCommand& desired_state);
 
 public:
-    ControlTask(QueueHandle_t snapshot_q, QueueHandle_t motor_q);
+    ControlTask(QueueHandle_t imu_data_q, QueueHandle_t rc_data_q, QueueHandle_t motor_q);
 
 protected:
     void run() override;

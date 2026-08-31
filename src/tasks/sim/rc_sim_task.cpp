@@ -4,9 +4,10 @@
 
 using namespace config;
 
-RCSimTask::RCSimTask(QueueHandle_t queue)
+RCSimTask::RCSimTask(QueueHandle_t data_queue, QueueHandle_t status_queue)
     : Task("RCSim", tasks::RC_STACK_SIZE, tasks::RC_PRIORITY),
-      rc_queue_(queue) {
+      data_queue_(data_queue),
+      status_queue_(status_queue) {
 
     last_cmd_ = {
         .valid = false,
@@ -32,11 +33,21 @@ void RCSimTask::run() {
 
     printf("[RCSim] Task started\n");
 
+    RCStatus status;
+
     while (true) {
 
         sim();
 
-        xQueueOverwrite(rc_queue_, &last_cmd_);
+        status = 
+        {
+            .valid = last_cmd_.valid,
+            .throttle = last_cmd_.throttle
+        };
+
+        // Send the simulated RC command to the other tasks
+        xQueueOverwrite(data_queue_,    &last_cmd_);
+        xQueueOverwrite(status_queue_,  &status);
 
         delay(tasks::RC_UPDATE_MS);
     }

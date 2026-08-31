@@ -60,7 +60,7 @@ struct MagData {
         : magnetic_field(field), timestamp_ms(ts), valid(field.is_valid()) {}
 };
 
-struct SensorData {
+struct IMUData {
     GyroData gyro;
     AccelData accel; 
     // MagData mag; // TODO: Implement mag task (not used in drone_project)
@@ -78,4 +78,10 @@ struct SensorData {
     bool has_any_data() const {
         return has_gyro() || has_accel() || has_mag();
     }
+};
+
+struct IMUStatus {
+    bool     valid{false};
+    uint32_t sequence_number{0};
+    uint32_t timestamp_ms{0};
 };

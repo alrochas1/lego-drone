@@ -19,13 +19,13 @@ private:
     
     bool initialize_gyro();
     bool initialize_accel();
-    void process_gyro_data(SensorData *sensor_data);
-    void process_accel_data(SensorData *sensor_data);
+    void process_gyro_data(IMUData *sensor_data);
+    void process_accel_data(IMUData *sensor_data);
     // void handle_read_error();
 
 public:
-    explicit IMUTask(QueueHandle_t data_queue);
-    
+    IMUTask(QueueHandle_t data_queue, QueueHandle_t status_queue);
+
     IMUTask(const IMUTask&) = delete;
     IMUTask& operator=(const IMUTask&) = delete;
     

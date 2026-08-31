@@ -11,9 +11,10 @@
 class IMUSimTask : public Task {
 private:
     QueueHandle_t data_queue_;
+    QueueHandle_t status_queue_;
 
 public:
-    explicit IMUSimTask(QueueHandle_t queue);
+    IMUSimTask(QueueHandle_t data_queue, QueueHandle_t status_queue);
 
     void run() override;
 };

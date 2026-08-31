@@ -4,8 +4,8 @@
 
 using namespace config;
 
-IMUTask::IMUTask(QueueHandle_t data_queue) 
-    : I2CSensorTask("IMU", tasks::IMU_STACK_SIZE, tasks::IMU_PRIORITY, data_queue)
+IMUTask::IMUTask(QueueHandle_t data_queue, QueueHandle_t status_queue) 
+    : I2CSensorTask("IMU", tasks::IMU_STACK_SIZE, tasks::IMU_PRIORITY, data_queue, status_queue)
     , gyro_(i2c1), accel_(i2c1) {
     
     printf("[IMU] Task created \n");
@@ -29,7 +29,7 @@ bool IMUTask::initialize_gyro() {
     return true;
 }
 
-void IMUTask::process_gyro_data(SensorData *sensor_data) {
+void IMUTask::process_gyro_data(IMUData *sensor_data) {
     auto gyro_data = gyro_.read_gyro();
 
     sensor_data->gyro = gyro_data; 
@@ -50,7 +50,7 @@ bool IMUTask::initialize_accel() {
     return true;
 }
 
-void IMUTask::process_accel_data(SensorData *sensor_data) {
+void IMUTask::process_accel_data(IMUData *sensor_data) {
     auto accel_data = accel_.read_accel();
 
     sensor_data->accel = accel_data;   
@@ -70,15 +70,24 @@ void IMUTask::run() {
     }
     
     while (true) {
-        SensorData sensor_data{};  // reset
+        IMUData     sensor_data{};  // reset
+        IMUStatus   status_data{};  // reset
 
         process_gyro_data(&sensor_data);
         process_accel_data(&sensor_data);
 
         sensor_data.sequence_number++;  // TODO: Change
 
+        // Fill status data
+        status_data.valid = sensor_data.is_complete();
+        status_data.sequence_number = sensor_data.sequence_number;
+        // TODO: Add timestamp to status data
+
+        // Send data to other tasks
         // TODO: Add error handling
-        xQueueSend(data_queue_, &sensor_data, 0);
+        xQueueSend(data_queue_,     &sensor_data, 0);
+        xQueueSend(status_queue_,   &status_data, 0);
+
         delay(tasks::IMU_SAMPLE_MS);
     }
 }
