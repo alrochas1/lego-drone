@@ -78,6 +78,7 @@ namespace tasks {
 namespace queues {
     constexpr uint8_t SYSTEM_QUEUE_LENGTH = 1;
     constexpr uint8_t SENSOR_QUEUE_LENGTH = 10;
+    constexpr uint8_t LOG_QUEUE_LENGTH    = 10; // TODO: Check
     // constexpr uint8_t MAX_QUEUE_WAIT_MS = portMAX_DELAY;
 } // namespace queues
 

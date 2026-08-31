@@ -42,15 +42,18 @@ public:
 };
 
 
-class I2CSensorTask : public Task{
+class I2CSensorTask : public Task {
 protected:
     QueueHandle_t data_queue_;
+    QueueHandle_t status_queue_;
     // bool initialized_{false};
 
     // virtual bool initialize_sensor() = 0;
 
 public:
-    I2CSensorTask(const std::string& name, uint32_t stack_size, UBaseType_t priority, QueueHandle_t data_queue)
-        : Task(name, stack_size, priority), data_queue_(data_queue) {}
-
+    I2CSensorTask(const std::string& name, uint32_t stack_size, UBaseType_t priority,
+                  QueueHandle_t data_queue, QueueHandle_t status_queue)
+        : Task(name, stack_size, priority),
+          data_queue_(data_queue),
+          status_queue_(status_queue) {}
 };

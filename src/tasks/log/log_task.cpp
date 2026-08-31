@@ -1,6 +1,6 @@
 // log_task.cpp
 #include "tasks/log/log_task.hpp"
-#include "drone_project/config/project_config.hpp"
+#include "config/project_config.hpp"
 #include <cstdio>
 
 using namespace config;
@@ -28,28 +28,21 @@ void LogTask::run() {
             printf("[STATE] %s\n", state_to_string(snap.state));
 
             // RC
-            printf("[RC] Valid:%s T:%.2f R:%.2f P:%.2f Y:%.2f\n",
+            printf("[RC] Valid:%s T:%.2f \n",
                 snap.rc.valid ? "OK" : "FAIL",
-                snap.rc.throttle,
-                snap.rc.roll,
-                snap.rc.pitch,
-                snap.rc.yaw);
+                snap.rc.throttle);
 
             // IMU
-            printf("[GYRO] Valid:%s | %.2f %.2f %.2f\n",
-                snap.imu.has_gyro() ? "OK" : "FAIL",
-                snap.imu.gyro.angular_velocity.x,
-                snap.imu.gyro.angular_velocity.y,
-                snap.imu.gyro.angular_velocity.z);
-
-            printf("[ACCEL] Valid:%s | %.2f %.2f %.2f\n",
-                snap.imu.has_accel() ? "OK" : "FAIL",
-                snap.imu.accel.linear_acceleration.x,
-                snap.imu.accel.linear_acceleration.y,
-                snap.imu.accel.linear_acceleration.z);
+            printf("[GYRO] Valid:%s | t=%lu\n",
+                snap.imu.valid ? "OK" : "FAIL",
+                snap.imu.timestamp_ms);
+            
+            printf("[ACCEL] Valid:%s | t=%lu\n",
+                snap.imu.valid ? "OK" : "FAIL",
+                snap.imu.timestamp_ms);
         }
 
-        // Log motor commands
+        // Log motor commands (this shouldnt be here, is for debugging)
         MotorCommands motor_cmds;
         if (xQueuePeek(motor_queue_, &motor_cmds, 0) == pdPASS) {
             printf("[MOTORS] M1=%u M2=%u M3=%u M4=%u\n",

@@ -5,15 +5,16 @@
 #include <queue.h>
 
 #include "tasks/common/task_wrapper.hpp"
-#include "drone_project/types/sensor_data.hpp"
-#include "drone_project/config/project_config.hpp"
+#include "types/sensor_data.hpp"
+#include "config/project_config.hpp"
 
 class IMUSimTask : public Task {
 private:
     QueueHandle_t data_queue_;
+    QueueHandle_t status_queue_;
 
 public:
-    explicit IMUSimTask(QueueHandle_t queue);
+    IMUSimTask(QueueHandle_t data_queue, QueueHandle_t status_queue);
 
     void run() override;
 };

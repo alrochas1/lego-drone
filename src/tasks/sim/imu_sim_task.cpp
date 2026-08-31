@@ -3,9 +3,9 @@
 
 using namespace config;
 
-IMUSimTask::IMUSimTask(QueueHandle_t queue)
+IMUSimTask::IMUSimTask(QueueHandle_t data_queue, QueueHandle_t status_queue)
     : Task("IMUSim", tasks::IMU_STACK_SIZE, tasks::IMU_PRIORITY),
-      data_queue_(queue) {
+      data_queue_(data_queue), status_queue_(status_queue) {
 
     printf("[IMUSim] Task created\n");
 }
@@ -18,7 +18,8 @@ void IMUSimTask::run() {
 
     while (true) {
 
-        SensorData data{};
+        IMUData     data{};
+        IMUStatus   status{};
 
         auto timestamp_ms = to_ms_since_boot(get_absolute_time());
         // data.sequence_number = seq++;    // TODO: Check
@@ -37,7 +38,8 @@ void IMUSimTask::run() {
         linear_acceleration.z = 9.81f;
         data.accel = AccelData(linear_acceleration, timestamp_ms);
 
-        xQueueSend(data_queue_, &data, 0);
+        xQueueSend(data_queue_,     &data, 0);
+        xQueueSend(status_queue_,   &status, 0);
         delay(tasks::IMU_SAMPLE_MS);
     }
 }

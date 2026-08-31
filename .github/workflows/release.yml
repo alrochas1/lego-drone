@@ -1,0 +1,91 @@
+name: Auto Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [devel]
+
+jobs:
+  release:
+    # Only run this job if:
+    # 1. The PR was merged (not closed without merge)
+    # 2. The branch follows the pattern YY-release-vX.X
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.head_ref, 'release-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: devel
+
+      - name: Extract version from branch name
+        id: version
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          # Extract version from the YY-release-vX.X format
+          # Example: 13-release-v0.2 -> v0.2
+          VERSION=$(echo "$BRANCH" | grep -oP 'v\d+\.\d+(\.\d+)?' | head -1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH" >> $GITHUB_OUTPUT
+          
+          # Extract only the issue number (YY)
+          ISSUE=$(echo "$BRANCH" | grep -oP '^\d+' || echo "")
+          echo "issue=$ISSUE" >> $GITHUB_OUTPUT
+          
+          echo "Version: $VERSION"
+          echo "Issue:   $ISSUE"
+
+      - name: Check if version extracted
+        if: steps.version.outputs.version == ''
+        run: |
+          echo "Cannot extract version from branch name: ${{ github.head_ref }}"
+          echo "The format must be: YY-release-vX.X (e.g., 13-release-v0.2)"
+          exit 1
+
+      - name: Check if PR to main exists
+        id: check_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Search for existing PR from this branch to main
+          PR_NUMBER=$(gh pr list --head "${{ github.head_ref }}" --base main --state open --json number --jq '.[0].number' || echo "")
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          
+          if [ -n "$PR_NUMBER" ]; then
+            echo "PR exist in main: #$PR_NUMBER"
+          else
+            echo "No existing PR to main found. A new PR will be created."
+          fi
+
+      - name: Create or update PR to main
+        if: steps.check_pr.outputs.pr_number == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="Release ${{ steps.version.outputs.version }}"
+          BODY="## Auto-release
+          
+          ### Branches
+          - **Origin:** ${{ github.head_ref }}
+          - **Destine:** main
+          
+          ### Release created automatically by GitHub Actions
+          - Issue related: #${{ steps.version.outputs.issue }}
+          - Date: $(date)
+          
+          **This PR will be merged automatically**"
+          
+          gh pr create --base main \
+                       --head "${{ github.head_ref }}" \
+                       --title "$TITLE" \
+                       --body "$BODY" \
+                       --label "release,auto-merge"
+          
+          echo "PR created to main"

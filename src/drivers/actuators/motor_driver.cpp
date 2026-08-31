@@ -1,5 +1,5 @@
 // motor_driver.cpp --> This is for controlling a motor using a custom driver (SI2300 + 1N4148). 
-#include "drivers/motor_driver.hpp"
+#include "motor_driver.hpp"
 
 MotorDriver::MotorDriver(uint pwm_pin) 
     : pwm_pin_(pwm_pin) {

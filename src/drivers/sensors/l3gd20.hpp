@@ -1,8 +1,8 @@
 // l3gd20.hpp
 #pragma once
-#include "i2c_device.hpp"
-#include <drone_project/types/sensor_data.hpp>
-#include "drone_project/config/project_config.hpp"
+#include "drivers/bus/i2c_device.hpp"
+#include <types/sensor_data.hpp>
+#include "config/project_config.hpp"
 
 
 class L3GD20 : public I2CDevice {

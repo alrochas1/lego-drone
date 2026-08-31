@@ -1,6 +1,6 @@
 // system_task.cpp
 #include "system_task.hpp"
-#include "drone_project/config/hardware_config.hpp"
+#include "config/hardware_config.hpp"
 
 #define SIM_BATTERY 0 // For testing without battery (USB mode). Be careful if the motors are connected!
 
@@ -8,8 +8,8 @@ using namespace config;
 
 
 SystemStateTask::SystemStateTask(QueueHandle_t imu_q,
-                             QueueHandle_t rc_q,
-                             QueueHandle_t state_q)
+                                 QueueHandle_t rc_q,
+                                 QueueHandle_t state_q)
     : Task("STATE", 512, 3),
       imu_queue_(imu_q),
       rc_queue_(rc_q),
@@ -21,10 +21,10 @@ SystemStateTask::SystemStateTask(QueueHandle_t imu_q,
 
 void SystemStateTask::run() {
 
-    SystemInputs inputs{};
-    SensorData imu{};
-    RCCommand rc{};
-    SystemSnapshot snap{};
+    SystemInputs    inputs{};
+    IMUStatus       imu{};
+    RCStatus        rc{};
+    SystemSnapshot  snap{};
 
     printf("[SYSTEM STATE] Task started - Update interval: %lu ms\n", tasks::SYSTEM_UPDATE_MS);
 
@@ -40,14 +40,15 @@ void SystemStateTask::run() {
 
         // IMU
         if (xQueueReceive(imu_queue_, &imu, 0) == pdPASS) {
-            inputs.imu_ok = imu.has_gyro() && imu.has_accel(); // Add mag if needed
+            inputs.imu_ok = imu.valid;
             snap.imu = imu;
         }
 
         // RC
         if (xQueueReceive(rc_queue_, &rc, 0) == pdPASS) {
-            inputs.rc_ok = rc.valid;
+            inputs.rc_ok    = rc.valid;
             inputs.throttle = rc.throttle;
+
             snap.rc = rc;
         } else {
             inputs.rc_ok = false;
