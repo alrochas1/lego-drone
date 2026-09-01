@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## Current Status: Development
+
+- [ ] Suitable for flight
+
+### Software Arquitecture
+- [x] RP2040 + FreeRTOS Architecture
+- [x] IMU L3GD20 + LSM303D Driver
+- [x] PWM Motor Driver
+- [ ] ELRS RC Driver
+- [x] Safety State Machine
+- [x] Flight Controller with Cascaded PID
+
+### Testing
+- [x] Continuous Integration (CI)
+- [x] Firmware Test
+- [x] Unit Testing for State Machine
+- [x] Unit Testing for Control
+
+### Hardware
+- [ ] Main PCB for electronics
+- [x] Prototype motor-driver boards 
+- [ ] PCB for Motor Driver
+
 
 ## [0.2.0] - 2026-08-26
 
@@ -25,14 +48,10 @@ All notable changes to this project will be documented in this file.
 ### Known Limitations
 
 - IR task is not yet implemented (commented out in `main.cpp`)
+- RC driver is not yet implemented
 - RC input pins are not yet configured for a physical receiver
 - Magnetometer support is incomplete in the LSM303D driver
 - Flight control and PID stabilization are not yet implemented
-
-### Future Work
-
-- [ ] Implement RC receiver input handling
-- [ ] Add PID control loops for motor stabilization
 
 
 ## [0.1.0] - 2026-06-02
@@ -73,11 +92,7 @@ All notable changes to this project will be documented in this file.
 ### Known Limitations
 
 - IR task not yet implemented (commented out in main.cpp)
+- RC driver is not yet implemented
 - RC input pins not yet configured
 - Magnetometer support incomplete in LSM303D driver
 - Flight control and PID stabilization are not yet implemented
-
-### Future Work
-
-- [ ] Implement RC receiver input handling
-- [ ] Add PID control loops for motor stabilization

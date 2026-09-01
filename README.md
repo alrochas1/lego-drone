@@ -2,8 +2,15 @@
 Personal project to build a quadcopter using a LEGO Technic custom frame, a Raspberry Pi Pico (RP2040) and FreeRTOS,
 as a way to explore embedded software architecture and flight control using intentionally non-optimal hardware.
 
+This is an experimental project. The objective is not to build a competitive or production-grade flight controller, using prebuilt flight-controller hardware such as PX4 or a carbon-fiber frame.
+
+This project is work in progress. More detailed documentation is available in the doc/ directory and the changelog.
+
+<!-- <img src="doc/img/pcb/full_drone.png" alt="Drone Picture" width="600px" /> -->
+
 ## Features
 * FreeRTOS running on RP2040
+* Flight Controller based in a Cascaded PID and an Attitude estimator
 * CMake-based build system
 * Modular task architecture
 * Queue-based inter-task communication
