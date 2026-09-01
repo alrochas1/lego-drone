@@ -6,7 +6,7 @@
 #include "flight_controller.hpp"
 #include "motor_mixer.hpp"
 
-const float GRAVITY = GRAVITY;
+const float GRAVITY = -9.80665f;
 
 // Test that the flight controller produces zero control outputs when throttle is zero
 TEST(ControlTest, ZeroThrottleProducesZeroControl)
@@ -191,6 +191,39 @@ TEST(ControlTest, YawInputProducesYawMotorCommands)
     // Check the expected motor relationship.
     EXPECT_GT(motors.motor[1], motors.motor[0]);
     EXPECT_GT(motors.motor[2], motors.motor[3]);
+}
+
+
+// Test that the flight controller preserves throttle when mixing motor commands
+TEST(ControlTest, ThrottleIsPreserved)
+{
+    FlightController controller{};
+    MotorMixer       mixer{};
+
+    IMUData   imu{};
+    RCCommand rc{};
+
+    rc.throttle     = 0.5f;
+    float expected  = rc.throttle * 1023.0f;
+
+    imu.accel.linear_acceleration = {0.0f, 0.0f, GRAVITY};
+
+    RCCommand     control = {};
+    MotorCommands motors = {};
+
+    // Simulate multiple updates to allow the controller to stabilize
+    float mean = 0.0f;
+    for (int i = 0; i < 10; ++i) {
+        control = controller.update(imu, rc);
+        motors  = mixer.mix_motors(control);
+
+        imu.gyro.timestamp_ms += 10; // FIX this
+
+        // Check that the average motor command is approximately equal to the throttle input
+        mean = (motors.motor[0] + motors.motor[1] + motors.motor[2] + motors.motor[3]) / 4.0f;
+
+        EXPECT_NEAR(mean, expected, 2.0f);
+    }
 }
 
 

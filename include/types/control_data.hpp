@@ -2,7 +2,8 @@
 
 #pragma once
 
-constexpr uint8_t N_MOTORS = 4;
+constexpr uint8_t N_MOTORS  = 4;
+constexpr float   MOTOR_MAX = 1023.0f;
 
 struct PIDController {
     // Placeholder for PID controller implementation
