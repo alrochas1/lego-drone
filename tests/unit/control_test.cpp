@@ -6,7 +6,7 @@
 #include "flight_controller.hpp"
 #include "motor_mixer.hpp"
 
-const float GRAVITY = -9.80665f;
+constexpr float TEST_GRAVITY = 9.80665f;
 
 // Test that the flight controller produces zero control outputs when throttle is zero
 TEST(ControlTest, ZeroThrottleProducesZeroControl)
@@ -29,13 +29,8 @@ TEST(ControlTest, ZeroThrottleProducesZeroControl)
     EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
 
     // Check that a non-zero IMU reading produces zero control outputs with throttle at zero
-    imu.gyro.angular_velocity.x = 0.1f;
-    imu.gyro.angular_velocity.y = 0.2f;
-    imu.gyro.angular_velocity.z = 0.3f;
-
-    imu.accel.linear_acceleration.x = 0.1f;
-    imu.accel.linear_acceleration.y = 0.2f;
-    imu.accel.linear_acceleration.z = GRAVITY;
+    imu.gyro.angular_velocity       = Vector3f{0.1f, 0.2f, 0.3f};
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
 
     imu.gyro.timestamp_ms += 10; // FIX this
 
@@ -79,15 +74,10 @@ TEST(ControlTest, NonZeroThrottleProducesNonZeroControl)
     // Set a non-zero throttle and check that control outputs are non-zero
     rc.throttle = 0.5f;
 
-    imu.gyro.angular_velocity.x = 0.1f;
-    imu.gyro.angular_velocity.y = 0.2f;
-    imu.gyro.angular_velocity.z = 0.3f;
+    imu.gyro.angular_velocity       = Vector3f{0.1f, 0.2f, 0.3f};
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
 
-    imu.accel.linear_acceleration.x = 0.1f;
-    imu.accel.linear_acceleration.y = 0.2f;
-    imu.accel.linear_acceleration.z = GRAVITY;
-
-    RCCommand       control{};
+    ControlOutput    control{};
     MotorCommands   motor_commands{};
 
     // Simulate multiple updates to allow the controller to stabilize
@@ -122,12 +112,10 @@ TEST(ControlTest, RollInputProducesRollMotorCommands)
     rc.throttle = 0.1f;
     rc.roll     = 0.5f;
 
-    imu.accel.linear_acceleration.x = 0.0f;
-    imu.accel.linear_acceleration.y = 0.0f;
-    imu.accel.linear_acceleration.z = GRAVITY;
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
 
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
+    ControlOutput control = controller.update(imu, rc);
+    MotorCommands motors  = mixer.mix_motors(control);
 
     // Check that the roll control output is positive when the RC roll input is positive
     EXPECT_GT(control.roll, 0.0f);
@@ -150,12 +138,10 @@ TEST(ControlTest, PitchInputProducesPitchMotorCommands)
     rc.throttle = 0.1f;
     rc.pitch    = -0.5f;
 
-    imu.accel.linear_acceleration.x = 0.0f;
-    imu.accel.linear_acceleration.y = 0.0f;
-    imu.accel.linear_acceleration.z = GRAVITY;
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
 
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
+    ControlOutput control = controller.update(imu, rc);
+    MotorCommands motors  = mixer.mix_motors(control);
 
     // Check that the pitch control output is negative when the RC pitch input is negative
     EXPECT_LT(control.pitch, 0.0f);
@@ -178,12 +164,10 @@ TEST(ControlTest, YawInputProducesYawMotorCommands)
     rc.throttle = 0.1f;
     rc.yaw      = 0.5f;
 
-    imu.gyro.angular_velocity.x = 0.0f;
-    imu.gyro.angular_velocity.y = 0.0f;
-    imu.gyro.angular_velocity.z = 0.1f;
+    imu.gyro.angular_velocity = Vector3f{0.0f, 0.0f, 0.1f};
 
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
+    ControlOutput control = controller.update(imu, rc);
+    MotorCommands motors  = mixer.mix_motors(control);
 
     // Check that the yaw control output is positive when the RC yaw input is positive
     EXPECT_GT(control.yaw, 0.0f);
@@ -206,9 +190,9 @@ TEST(ControlTest, ThrottleIsPreserved)
     rc.throttle     = 0.5f;
     float expected  = rc.throttle * 1023.0f;
 
-    imu.accel.linear_acceleration = {0.0f, 0.0f, GRAVITY};
+    imu.accel.linear_acceleration = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
 
-    RCCommand     control = {};
+    ControlOutput control = {};
     MotorCommands motors = {};
 
     // Simulate multiple updates to allow the controller to stabilize
@@ -241,9 +225,7 @@ TEST(ControlTest, ThrottleIsPreserved)
 
 //     rc.throttle = 0.2f;
 
-//     imu.accel.linear_acceleration.x = GRAVITY * std::sin(ROLL); // Simulate a roll perturbation
-//     imu.accel.linear_acceleration.y = 0.0f;
-//     imu.accel.linear_acceleration.z = GRAVITY * std::cos(ROLL); // Simulate a roll perturbation
+//     imu.accel.linear_acceleration = Vector3f{GRAVITY * std::sin(ROLL), 0.0f, GRAVITY * std::cos(ROLL)}; // Simulate a roll perturbation
 
 //     imu.gyro.timestamp_ms += 10; // FIX this
 
