@@ -7,6 +7,7 @@
 #include "types/comms_data.hpp"
 #include "types/control_data.hpp"
 
+#include "tasks/common/control_interface.hpp"
 #include "flight_controller/flight_controller.hpp"
 #include "motor_mixer/motor_mixer.hpp"
 
@@ -16,13 +17,19 @@ private:
     QueueHandle_t rc_queue_;
     QueueHandle_t motor_queue_;
     
-    FlightController    flight_controller_;
-    MotorMixer          motor_mixer_;
+    IFlightController*  controller_;
+
+    FlightController    default_controller_{};
+    MotorMixer          motor_mixer_{};
 
     RCCommand last_rc_ = {};
 
 public:
-    ControlTask(QueueHandle_t imu_q, QueueHandle_t rc_q, QueueHandle_t motor_q);
+    ControlTask(
+        QueueHandle_t      imu_q, 
+        QueueHandle_t      rc_q, 
+        QueueHandle_t      motor_q,
+        IFlightController* controller = nullptr);
 
 protected:
     void run() override;

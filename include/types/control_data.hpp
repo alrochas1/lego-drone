@@ -2,26 +2,41 @@
 
 #pragma once
 
+#include <cstdint>
+
 constexpr uint8_t N_MOTORS  = 4;
 constexpr float   MOTOR_MAX = 1023.0f;
 
-struct PIDController {
-    // Placeholder for PID controller implementation
+// Constants for control calculations
+namespace {
+    constexpr float GRAVITY             = 9.80665f;
+    constexpr float COMPLEMENTARY_ALPHA = 0.98f;
+    constexpr float TWO_PI              = 6.28318530718f;
+}
+
+// Struct for attitude representation
+struct Attitude {
+    float roll;     // rad
+    float pitch;    // rad
+    float yaw;      // rad
 };
 
-struct Inclination {
-    float roll;      // Rotation around X-axis
-    float pitch;     // Rotation around Y-axis
-    float yaw;       // Rotation around Z-axis
+// Struct for rate command representation
+struct RateCommand {
+    float roll{};
+    float pitch{};
+    float yaw{};
 };
 
-struct DroneController {
-    PIDController roll;
-    PIDController pitch;
-    PIDController yaw;
-    PIDController altitude;
+// Structs for control data output
+struct ControlOutput {
+    float throttle; // [0, 1]
+    float roll;     // [-1, 1]
+    float pitch;    // [-1, 1]
+    float yaw;      // [-1, 1]
 };
 
+// Struct for motor commands
 struct MotorCommands {
     uint8_t  num_motors = N_MOTORS;  // Number of motors
     uint16_t motor[N_MOTORS];        // Motor power (0-1023)

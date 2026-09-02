@@ -4,7 +4,7 @@
 
 
 MotorCommands MotorMixer::mix_motors(
-    const RCCommand& control)
+    const ControlOutput& control)
 {
     MotorCommands commands{};
     float m[4]{};

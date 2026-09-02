@@ -1,33 +1,29 @@
 // flight_controller.hpp
 #pragma once
 
+// #include "control_output.hpp"
 #include "types/sensor_data.hpp"
-#include "types/control_data.hpp"
+#include "types/comms_data.hpp"
 
-class FlightController {
+#include "tasks/common/control_interface.hpp"
+
+#include "estimator/attitude_estimator.hpp"
+#include "controller/attitude_controller.hpp"
+#include "controller/rate_controller.hpp"
+
+class FlightController : public IFlightController {
 public:
-    FlightController() = default;
-
-    RCCommand update(const IMUData& imu, const RCCommand& rc);
+    ControlOutput update(
+        const IMUData& imu,
+        const RCCommand& rc) override;
 
 private:
-    Inclination estimate_state(const IMUData& imu);
-
-    RCCommand attitude_controller(
-        const Inclination& current_state,
-        const RCCommand& desired_state);
-
-    RCCommand rate_controller(
-        const RCCommand& desired_rate,
-        const IMUData& imu);
-
-    MotorCommands mix_motors(
-        const RCCommand& control,
-        float throttle);
+    AttitudeEstimator   attitude_estimator_{};
+    AttitudeController  attitude_controller_{};
+    RateController      rate_controller_{};
 
     float update_dt(uint32_t timestamp);
 
     float       dt_{0.002f};
     uint32_t    previous_timestamp_{0};
-    Inclination attitude_{};
 };
