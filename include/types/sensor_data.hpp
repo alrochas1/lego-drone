@@ -28,6 +28,10 @@ struct Vector3f {
         }
         return *this;
     }
+
+    Vector3f operator*(float scalar) const {
+        return Vector3f(x * scalar, y * scalar, z * scalar);
+    }
 };
 
 struct GyroData {

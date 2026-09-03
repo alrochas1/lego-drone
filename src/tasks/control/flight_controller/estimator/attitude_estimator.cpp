@@ -20,7 +20,7 @@ Attitude AttitudeEstimator::update(const IMUData& imu, const float dt)
         accel_norm < 1.3f * GRAVITY) {
 
         const float roll_acc =
-            std::atan2(ay, az);
+            std::atan2(-ay, -az);
 
         const float pitch_acc =
             std::atan2(

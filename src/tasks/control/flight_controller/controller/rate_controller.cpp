@@ -13,12 +13,6 @@ ControlOutput RateController::update(
 {
     ControlOutput control{};
 
-    constexpr float RATE_KP = 0.008f;
-    constexpr float RATE_KI = 0.002f;
-
-    constexpr float INTEGRAL_LIMIT = 1.0f;
-    constexpr float OUTPUT_LIMIT   = 1.0f;
-
     static RateCommand integral{};
 
     const float error_roll =

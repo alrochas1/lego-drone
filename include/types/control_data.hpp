@@ -8,11 +8,24 @@ constexpr uint8_t N_MOTORS  = 4;
 constexpr float   MOTOR_MAX = 1023.0f;
 
 // Constants for control calculations
-namespace {
-    constexpr float GRAVITY             = 9.80665f;
-    constexpr float COMPLEMENTARY_ALPHA = 0.98f;
-    constexpr float TWO_PI              = 6.28318530718f;
-}
+constexpr float RATE_KP = 0.08f;
+constexpr float RATE_KI = 0.02f;
+
+constexpr float INTEGRAL_LIMIT = 1.0f;
+constexpr float OUTPUT_LIMIT   = 1.0f;
+
+constexpr float MAX_ANGLE =
+    30.0f * 3.14159265359f / 180.0f;
+
+constexpr float MAX_YAW_RATE =
+    180.0f * 3.14159265359f / 180.0f;
+
+constexpr float ATTITUDE_KP = 4.0f;
+
+constexpr float GRAVITY             = 9.80665f;         // Move to general constants header
+constexpr float COMPLEMENTARY_ALPHA = 0.98f;
+constexpr float TWO_PI              = 6.28318530718f;   // Move to general constants header
+
 
 // Struct for attitude representation
 struct Attitude {

@@ -11,14 +11,6 @@ RateCommand AttitudeController::update(
 {
     RateCommand desired_rate{};
 
-    constexpr float MAX_ANGLE =
-        30.0f * 3.14159265359f / 180.0f;
-
-    constexpr float MAX_YAW_RATE =
-        180.0f * 3.14159265359f / 180.0f;
-
-    constexpr float ATTITUDE_KP = 4.0f;
-
     const float desired_roll =
         desired_state.roll * MAX_ANGLE;
 

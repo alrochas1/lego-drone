@@ -100,6 +100,47 @@ TEST(ControlTest, NonZeroThrottleProducesNonZeroControl)
 }
 
 
+// Test that the flight controller produces equal motor commands when throttle is non-zero but IMU data is zero
+TEST(ControlTest, ZeroIMUProducesEqualMotorCommands)
+{
+    FlightController   controller{};
+    MotorMixer         mixer{};
+
+    IMUData     imu{};
+    RCCommand   rc{};
+
+    uint32_t timestamp_ms = 0;
+
+    // Set a non-zero throttle and zero IMU data
+    rc.throttle = 0.5f;
+
+    imu.gyro.angular_velocity       = Vector3f{0.0f, 0.0f, 0.0f};
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
+
+    ControlOutput control{};
+    MotorCommands motor_commands{};
+
+    // Simulate multiple updates to allow the controller to stabilize
+    for (int i = 0; i < 10; ++i) {      // Improve this
+        imu.gyro.timestamp_ms += 10;    // FIX this
+
+        control = controller.update(imu, rc);
+        motor_commands = mixer.mix_motors(control);
+    }
+
+    EXPECT_NE(control.throttle, 0.0f);
+
+    EXPECT_FLOAT_EQ(motor_commands.motor[0], motor_commands.motor[1]);
+    EXPECT_FLOAT_EQ(motor_commands.motor[1], motor_commands.motor[2]);
+    EXPECT_FLOAT_EQ(motor_commands.motor[2], motor_commands.motor[3]);
+
+    EXPECT_NEAR(motor_commands.motor[0], MOTOR_MAX * rc.throttle, 1.0f);
+    EXPECT_NEAR(motor_commands.motor[1], MOTOR_MAX * rc.throttle, 1.0f);
+    EXPECT_NEAR(motor_commands.motor[2], MOTOR_MAX * rc.throttle, 1.0f);
+    EXPECT_NEAR(motor_commands.motor[3], MOTOR_MAX * rc.throttle, 1.0f);
+}
+
+
 // Test that the flight controller estimates roll inclination correctly based on IMU data
 TEST(ControlTest, RollInputProducesRollMotorCommands)
 {
@@ -208,6 +249,58 @@ TEST(ControlTest, ThrottleIsPreserved)
 
         EXPECT_NEAR(mean, expected, 2.0f);
     }
+}
+
+
+// Test that the flight controller responds correctly to a roll command
+TEST(ControlTest, RollCommandProducesRollMotorCommands)
+{
+    FlightController   controller{};
+    MotorMixer         mixer{};
+
+    IMUData     imu{};
+    RCCommand   rc{};
+
+    rc.throttle = 0.2f;
+    rc.roll     = 0.5f;
+
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
+
+    ControlOutput control = controller.update(imu, rc);
+    MotorCommands motors  = mixer.mix_motors(control);
+
+    // Check that the roll control output is positive when the RC roll input is positive
+    EXPECT_GT(control.roll, 0.0f);
+
+    // Check the expected motor relationship.
+    EXPECT_GT(motors.motor[0], motors.motor[1]);
+    EXPECT_GT(motors.motor[2], motors.motor[3]);
+}
+
+
+// Test that the flight controller responds correctly to a pitch command
+TEST(ControlTest, PitchCommandProducesPitchMotorCommands)
+{
+    FlightController   controller{};
+    MotorMixer         mixer{};
+
+    IMUData     imu{};
+    RCCommand   rc{};
+
+    rc.throttle = 0.2f;
+    rc.pitch    = -0.5f;
+
+    imu.accel.linear_acceleration   = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
+
+    ControlOutput control = controller.update(imu, rc);
+    MotorCommands motors  = mixer.mix_motors(control);
+
+    // Check that the pitch control output is negative when the RC pitch input is negative
+    EXPECT_LT(control.pitch, 0.0f);
+
+    // Check the expected motor relationship.
+    EXPECT_GT(motors.motor[2], motors.motor[0]);
+    EXPECT_GT(motors.motor[3], motors.motor[1]);
 }
 
 

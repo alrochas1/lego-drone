@@ -23,7 +23,7 @@ ControlOutput FlightController::update(
     return control;
 }
 
-// Mix motor commands based on control inputs and throttle
+// Update the time delta based on the latest IMU timestamp
 float FlightController::update_dt(uint32_t timestamp)
 {
     float dt = 0;
@@ -35,12 +35,12 @@ float FlightController::update_dt(uint32_t timestamp)
         dt =
             static_cast<float>(
                 timestamp - previous_timestamp_) *
-            1e-6f;
+            1e-3f;
     }
 
     previous_timestamp_ = timestamp;
 
-    dt = std::clamp(dt, 0.0005f, 0.01f);
+    dt = std::clamp(dt, 0.001f, 0.02f);
 
     return dt;
 }
