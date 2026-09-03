@@ -53,13 +53,20 @@ target_link_libraries(system_tests_state_machine
 add_executable(control_tests
     unit/control_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/flight_controller.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/controller/attitude_controller.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/controller/rate_controller.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/estimator/attitude_estimator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/motor_mixer/motor_mixer.cpp
 )
 
 # Add include directories for control tests
 target_include_directories(control_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/system/state_machine
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/controller
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/flight_controller/estimator
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/tasks/control/motor_mixer
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )

@@ -6,222 +6,221 @@
 #include "flight_controller.hpp"
 #include "motor_mixer.hpp"
 
-const float GRAVITY = GRAVITY;
+
+// Helper functions for testing the FlightController and MotorMixer
+namespace {
+
+constexpr float TEST_GRAVITY = 9.80665f;
+constexpr uint32_t TEST_TIMESTEP_MS = 10;
+constexpr int SETTLE_UPDATES = 10;
+
+struct ControlTestRig {
+    FlightController controller{};
+    MotorMixer mixer{};
+    IMUData imu{};
+    RCCommand rc{};
+
+    ControlOutput update()
+    {
+        return controller.update(imu, rc);
+    }
+
+    MotorCommands update_and_mix()
+    {
+        return mixer.mix_motors(update());
+    }
+
+    void advance_time(uint32_t milliseconds = TEST_TIMESTEP_MS)
+    {
+        imu.gyro.timestamp_ms += milliseconds;
+    }
+
+    MotorCommands run_settled(ControlOutput& control)
+    {
+        MotorCommands motors{};
+        for (int update_number = 0; update_number < SETTLE_UPDATES; ++update_number) {
+            advance_time();
+            control = update();
+            motors = mixer.mix_motors(control);
+        }
+        return motors;
+    }
+};
+
+void set_level_imu(ControlTestRig& rig)
+{
+    rig.imu.accel.linear_acceleration = Vector3f{0.0f, 0.0f, -TEST_GRAVITY};
+}
+
+void expect_all_motors_zero(const MotorCommands& motors)
+{
+    for (uint8_t motor = 0; motor < N_MOTORS; ++motor) {
+        EXPECT_FLOAT_EQ(motors.motor[motor], 0.0f);
+    }
+}
+
+void expect_all_motors_equal(const MotorCommands& motors)
+{
+    for (uint8_t motor = 1; motor < N_MOTORS; ++motor) {
+        EXPECT_FLOAT_EQ(motors.motor[0], motors.motor[motor]);
+    }
+}
+
+void expect_all_motors_positive(const MotorCommands& motors)
+{
+    for (uint8_t motor = 0; motor < N_MOTORS; ++motor) {
+        EXPECT_GT(motors.motor[motor], 0.0f);
+    }
+}
+
+void expect_roll_response(const ControlOutput& control, const MotorCommands& motors)
+{
+    EXPECT_GT(control.roll, 0.0f);
+    EXPECT_GT(motors.motor[0], motors.motor[1]);
+    EXPECT_GT(motors.motor[2], motors.motor[3]);
+}
+
+void expect_pitch_response(const ControlOutput& control, const MotorCommands& motors)
+{
+    EXPECT_LT(control.pitch, 0.0f);
+    EXPECT_GT(motors.motor[2], motors.motor[0]);
+    EXPECT_GT(motors.motor[3], motors.motor[1]);
+}
+
+void expect_yaw_response(const ControlOutput& control, const MotorCommands& motors)
+{
+    EXPECT_GT(control.yaw, 0.0f);
+    EXPECT_GT(motors.motor[1], motors.motor[0]);
+    EXPECT_GT(motors.motor[2], motors.motor[3]);
+}
+
+
+} // namespace
+
+
+// ##################################################
+// ################# CONTROL TESTS ##################
+// ##################################################
 
 // Test that the flight controller produces zero control outputs when throttle is zero
 TEST(ControlTest, ZeroThrottleProducesZeroControl)
 {
-    FlightController   controller{};
-    MotorMixer         mixer{};
+    ControlTestRig rig{};
 
-    IMUData     imu{};
-    RCCommand   rc{};
+    // Set up the test rig with zero throttle and level IMU data
+    expect_all_motors_zero(rig.update_and_mix());
 
-    uint32_t timestamp_ms = 0;
+    // Set up the test rig with zero throttle but non-zero IMU data
+    rig.imu.gyro.angular_velocity = Vector3f{0.1f, 0.2f, 0.3f};
+    set_level_imu(rig);
+    rig.advance_time();
+    expect_all_motors_zero(rig.update_and_mix());
 
-    // Check that zero throttle and IMU produces zero control outputs
-    auto control = controller.update(imu, rc);
-    auto motor_commands = mixer.mix_motors(control);
-
-    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
-
-    // Check that a non-zero IMU reading produces zero control outputs with throttle at zero
-    imu.gyro.angular_velocity.x = 0.1f;
-    imu.gyro.angular_velocity.y = 0.2f;
-    imu.gyro.angular_velocity.z = 0.3f;
-
-    imu.accel.linear_acceleration.x = 0.1f;
-    imu.accel.linear_acceleration.y = 0.2f;
-    imu.accel.linear_acceleration.z = GRAVITY;
-
-    imu.gyro.timestamp_ms += 10; // FIX this
-
-    control = controller.update(imu, rc);
-    motor_commands = mixer.mix_motors(control);
-
-    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
-
-    // Check that a non-zero RC input produces zero control outputs with throttle at zero
-    rc.throttle =  0.0f;
-    rc.roll     =  0.5f;
-    rc.pitch    = -0.5f;
-    rc.yaw      =  0.2f;
-
-    imu.gyro.timestamp_ms += 10; // FIX this
-
-    control = controller.update(imu, rc);
-    motor_commands = mixer.mix_motors(control);
-
-    EXPECT_FLOAT_EQ(motor_commands.motor[0], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[1], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[2], 0.0f);
-    EXPECT_FLOAT_EQ(motor_commands.motor[3], 0.0f);
+    rig.rc.roll = 0.5f;
+    rig.rc.pitch = -0.5f;
+    rig.rc.yaw = 0.2f;
+    rig.advance_time();
+    expect_all_motors_zero(rig.update_and_mix());
 }
 
 
 // Test that the flight controller produces non-zero control outputs when throttle is non-zero
 TEST(ControlTest, NonZeroThrottleProducesNonZeroControl)
 {
-    FlightController   controller{};
-    MotorMixer         mixer{};
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.5f;
+    rig.imu.gyro.angular_velocity = Vector3f{0.1f, 0.2f, 0.3f};
+    set_level_imu(rig);
 
-    IMUData     imu{};
-    RCCommand   rc{};
-
-    uint32_t timestamp_ms = 0;
-
-    // Set a non-zero throttle and check that control outputs are non-zero
-    rc.throttle = 0.5f;
-
-    imu.gyro.angular_velocity.x = 0.1f;
-    imu.gyro.angular_velocity.y = 0.2f;
-    imu.gyro.angular_velocity.z = 0.3f;
-
-    imu.accel.linear_acceleration.x = 0.1f;
-    imu.accel.linear_acceleration.y = 0.2f;
-    imu.accel.linear_acceleration.z = GRAVITY;
-
-    RCCommand       control{};
-    MotorCommands   motor_commands{};
-
-    // Simulate multiple updates to allow the controller to stabilize
-    for (int i = 0; i < 10; ++i) {      // Improve this
-        imu.gyro.timestamp_ms += 10;    // FIX this
-
-        control = controller.update(imu, rc);
-        motor_commands = mixer.mix_motors(control);
-    }
+    ControlOutput control{};
+    const MotorCommands motors = rig.run_settled(control);
 
     EXPECT_NE(control.throttle, 0.0f);
-    EXPECT_NE(control.roll,     0.0f);
-    EXPECT_NE(control.pitch,    0.0f);
-    EXPECT_NE(control.yaw,      0.0f);
-
-    EXPECT_GT(motor_commands.motor[0], 0.0f);
-    EXPECT_GT(motor_commands.motor[1], 0.0f);
-    EXPECT_GT(motor_commands.motor[2], 0.0f);
-    EXPECT_GT(motor_commands.motor[3], 0.0f);
+    EXPECT_NE(control.roll, 0.0f);
+    EXPECT_NE(control.pitch, 0.0f);
+    EXPECT_NE(control.yaw, 0.0f);
+    expect_all_motors_positive(motors);
 }
 
 
-// Test that the flight controller estimates roll inclination correctly based on IMU data
-TEST(ControlTest, RollInputProducesRollMotorCommands)
+// Test that the flight controller produces equal motor commands when throttle is non-zero but IMU data is zero
+TEST(ControlTest, ZeroIMUProducesEqualMotorCommands)
 {
-    FlightController   controller{};
-    MotorMixer         mixer{};
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.5f;
+    set_level_imu(rig);
 
-    IMUData     imu{};
-    RCCommand   rc{};
+    ControlOutput control{};
+    const MotorCommands motors = rig.run_settled(control);
 
-    rc.throttle = 0.1f;
-    rc.roll     = 0.5f;
+    EXPECT_NE(control.throttle, 0.0f);
+    expect_all_motors_equal(motors);
 
-    imu.accel.linear_acceleration.x = 0.0f;
-    imu.accel.linear_acceleration.y = 0.0f;
-    imu.accel.linear_acceleration.z = GRAVITY;
-
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
-
-    // Check that the roll control output is positive when the RC roll input is positive
-    EXPECT_GT(control.roll, 0.0f);
-
-    // Check the expected motor relationship.
-    EXPECT_GT(motors.motor[0], motors.motor[1]);
-    EXPECT_GT(motors.motor[2], motors.motor[3]);
+    const float expected_motor_command = MOTOR_MAX * rig.rc.throttle;
+    for (uint8_t motor = 0; motor < N_MOTORS; ++motor) {
+        EXPECT_NEAR(motors.motor[motor], expected_motor_command, 1.0f);
+    }
 }
 
 
-// Test that the flight controller estimates pitch inclination correctly based on IMU data
-TEST(ControlTest, PitchInputProducesPitchMotorCommands)
+// Test that the flight controller preserves throttle when mixing motor commands
+TEST(ControlTest, ThrottleIsPreserved)
 {
-    FlightController   controller{};
-    MotorMixer         mixer{};
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.5f;
+    set_level_imu(rig);
 
-    IMUData     imu{};
-    RCCommand   rc{};
+    const float expected = rig.rc.throttle * MOTOR_MAX;
+    for (int update_number = 0; update_number < SETTLE_UPDATES; ++update_number) {
+        const MotorCommands motors = rig.update_and_mix();
+        const float mean = (motors.motor[0] + motors.motor[1] + motors.motor[2] + motors.motor[3]) / 4.0f;
 
-    rc.throttle = 0.1f;
-    rc.pitch    = -0.5f;
-
-    imu.accel.linear_acceleration.x = 0.0f;
-    imu.accel.linear_acceleration.y = 0.0f;
-    imu.accel.linear_acceleration.z = GRAVITY;
-
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
-
-    // Check that the pitch control output is negative when the RC pitch input is negative
-    EXPECT_LT(control.pitch, 0.0f);
-
-    // Check the expected motor relationship.
-    EXPECT_GT(motors.motor[2], motors.motor[0]);
-    EXPECT_GT(motors.motor[3], motors.motor[1]);
+        EXPECT_NEAR(mean, expected, 2.0f);
+        rig.advance_time();
+    }
 }
 
 
-// Test that the flight controller estimates yaw inclination correctly based on IMU data
-TEST(ControlTest, YawInputProducesYawMotorCommands)
+// Test that the flight controller produces roll responses when corresponding RC commands are given
+TEST(ControlTest, RollCommandProducesRollMotorCommands)
 {
-    FlightController   controller{};
-    MotorMixer         mixer{};
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.2f;
+    rig.rc.roll = 0.5f;
+    set_level_imu(rig);
 
-    IMUData     imu{};
-    RCCommand   rc{};
+    const ControlOutput control = rig.update();
+    const MotorCommands motors = rig.mixer.mix_motors(control);
 
-    rc.throttle = 0.1f;
-    rc.yaw      = 0.5f;
-
-    imu.gyro.angular_velocity.x = 0.0f;
-    imu.gyro.angular_velocity.y = 0.0f;
-    imu.gyro.angular_velocity.z = 0.1f;
-
-    RCCommand control    = controller.update(imu, rc);
-    MotorCommands motors = mixer.mix_motors(control);
-
-    // Check that the yaw control output is positive when the RC yaw input is positive
-    EXPECT_GT(control.yaw, 0.0f);
-
-    // Check the expected motor relationship.
-    EXPECT_GT(motors.motor[1], motors.motor[0]);
-    EXPECT_GT(motors.motor[2], motors.motor[3]);
+    expect_roll_response(control, motors);
 }
 
 
-// Test that a positive roll input produces a correction in the expected direction
-// FIXME: I need a better simulator for this
-// TEST(ControlTest, RollPerturbationProducesRollCorrection)
-// {
-//     FlightController controller{};
-//     MotorMixer mixer{};
+// Test that the flight controller produces pitch responses when corresponding RC commands are given
+TEST(ControlTest, PitchCommandProducesPitchMotorCommands)
+{
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.2f;
+    rig.rc.pitch = -0.5f;
+    set_level_imu(rig);
 
-//     IMUData  imu{};
-//     RCCommand rc{};
+    const ControlOutput control = rig.update();
+    const MotorCommands motors = rig.mixer.mix_motors(control);
 
-//     const float ROLL = 30 * M_PI / 180; // rad
+    expect_pitch_response(control, motors);
+}
 
-//     rc.throttle = 0.2f;
 
-//     imu.accel.linear_acceleration.x = GRAVITY * std::sin(ROLL); // Simulate a roll perturbation
-//     imu.accel.linear_acceleration.y = 0.0f;
-//     imu.accel.linear_acceleration.z = GRAVITY * std::cos(ROLL); // Simulate a roll perturbation
+// Test that the flight controller produces yaw responses when corresponding RC commands are given
+TEST(ControlTest, YawCommandProducesYawMotorCommands)
+{
+    ControlTestRig rig{};
+    rig.rc.throttle = 0.2f;
+    rig.rc.yaw = 0.5f;
+    set_level_imu(rig);
 
-//     imu.gyro.timestamp_ms += 10; // FIX this
+    const ControlOutput control = rig.update();
+    const MotorCommands motors = rig.mixer.mix_motors(control);
 
-//     // Simulate multiple updates to allow the controller to stabilize
-//     RCCommand control    = controller.update(imu, rc);
-//     MotorCommands motors = mixer.mix_motors(control);
-
-//     // Expect a positive roll correction
-//     EXPECT_GT(control.roll, 0.0f);
-
-//     // Check the expected motor relationship.
-//     EXPECT_GT(motors.motor[0], motors.motor[1]);
-//     EXPECT_GT(motors.motor[2], motors.motor[3]);
-// }
+    expect_yaw_response(control, motors);
+}

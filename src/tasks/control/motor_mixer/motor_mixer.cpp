@@ -4,7 +4,7 @@
 
 
 MotorCommands MotorMixer::mix_motors(
-    const RCCommand& control)
+    const ControlOutput& control)
 {
     MotorCommands commands{};
     float m[4]{};
@@ -45,7 +45,7 @@ MotorCommands MotorMixer::mix_motors(
     m[3] = std::clamp(m[3], 0.0f, 1.0f);
 
     for (int i = 0; i < 4; ++i) {
-        commands.motor[i] = static_cast<uint16_t>(m[i] * 1023.0f);
+        commands.motor[i] = static_cast<uint16_t>(m[i] * MOTOR_MAX);
     }
 
     return commands;
