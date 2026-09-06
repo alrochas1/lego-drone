@@ -7,7 +7,7 @@
 #define NO_SYS 0                    // Enable operating system support (FreeRTOS)
 #define SYS_LIGHTWEIGHT_PROT 1      // Enable lightweight protection for critical sections
 
-#define LWIP_SOCKET 0               // Enable socket API
+#define LWIP_SOCKET 1               // Enable socket API
 #define LWIP_NETCONN 1              // Enable netconn API
 
 #define LWIP_DHCP 1                 // Enable DHCP support

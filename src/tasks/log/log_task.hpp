@@ -6,6 +6,7 @@
 #include <queue.h>
 
 #include "tasks/common/task_wrapper.hpp"
+#include "drivers/comms/wifi_driver.hpp"
 #include <config/project_config.hpp>
 #include <types/sensor_data.hpp>
 #include <types/system_data.hpp>
@@ -18,7 +19,9 @@ private:
     
     QueueHandle_t snapshot_queue_;
     QueueHandle_t motor_queue_;
-    
+
+    WifiDriver wifi_;
+
 public:
     LogTask(QueueHandle_t snapshot_queue, QueueHandle_t motor_queue);
 

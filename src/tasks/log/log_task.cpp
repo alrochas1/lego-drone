@@ -1,5 +1,5 @@
 // log_task.cpp
-#include "tasks/log/log_task.hpp"
+#include "log_task.hpp"
 #include "config/project_config.hpp"
 #include <cstdio>
 
@@ -8,7 +8,8 @@ using namespace config;
 LogTask::LogTask(QueueHandle_t snapshot_queue, QueueHandle_t motor_queue)
     : Task("LOG", tasks::LOG_STACK_SIZE, tasks::LOG_PRIORITY),
       snapshot_queue_(snapshot_queue),
-      motor_queue_(motor_queue) {
+      motor_queue_(motor_queue),
+      wifi_("", "", "0.0.0.0", 0){  // FIXME: Move WiFi credentials to config
 
     printf("[LOG] Task created\n");
 }
@@ -16,6 +17,9 @@ LogTask::LogTask(QueueHandle_t snapshot_queue, QueueHandle_t motor_queue)
 void LogTask::run() {
 
     SystemSnapshot snap;
+
+    wifi_.init();
+    wifi_.connect(1000);
 
     while (true) {
 
@@ -53,7 +57,12 @@ void LogTask::run() {
         }
 
         printf("=======================\n");
-        
+
+        // Send data over WiFi (if connected)
+        if (wifi_.is_connected()) {
+            wifi_.send("HELLO FROM PICO");
+        }
+
         delay(tasks::LOG_PRINT_MS);  // 2 Hz logging
     }
 }
