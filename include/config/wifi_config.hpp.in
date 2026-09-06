@@ -1,0 +1,12 @@
+#pragma once
+
+#include <cstdint>
+
+namespace config::wifi {
+
+constexpr const char* SSID      = "@WIFI_SSID@";
+constexpr const char* PASSWORD  = "@WIFI_PASSWORD@";
+constexpr const char* REMOTE_IP = "@WIFI_REMOTE_IP@";
+constexpr uint16_t REMOTE_PORT  = @WIFI_REMOTE_PORT@;
+
+}

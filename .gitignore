@@ -44,3 +44,5 @@
 build
 build-*/
 .vscode
+cmake/wifi_credentials.cmake
+include/config/wifi_config.hpp

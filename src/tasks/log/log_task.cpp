@@ -1,6 +1,7 @@
 // log_task.cpp
 #include "log_task.hpp"
 #include "config/project_config.hpp"
+#include "config/wifi_config.hpp"
 #include <cstdio>
 
 using namespace config;
@@ -9,8 +10,12 @@ LogTask::LogTask(QueueHandle_t snapshot_queue, QueueHandle_t motor_queue)
     : Task("LOG", tasks::LOG_STACK_SIZE, tasks::LOG_PRIORITY),
       snapshot_queue_(snapshot_queue),
       motor_queue_(motor_queue),
-      wifi_("", "", "0.0.0.0", 0){  // FIXME: Move WiFi credentials to config
-
+      wifi_(
+        wifi::SSID, 
+        wifi::PASSWORD, 
+        wifi::REMOTE_IP, 
+        wifi::REMOTE_PORT)
+{
     printf("[LOG] Task created\n");
 }
 
