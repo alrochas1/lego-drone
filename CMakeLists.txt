@@ -11,7 +11,10 @@ include(pico_sdk_import.cmake)
 include(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
 
 # Define project
-project(${ProjectName})
+project(${ProjectName} LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Initialize the Raspberry Pi Pico SDK
 pico_sdk_init()

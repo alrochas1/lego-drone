@@ -28,8 +28,11 @@ void LedTask::run() {
             blink_ms = get_blink_interval(snap.state);
         }
         
-        gpio_put(led_pin, state);
-        state = !state;
+        // In pico W, the LED is controlled by the WiFi driver, so we don't toggle it here
+        #if BOARD_W != 1
+            gpio_put(led_pin, state);
+            state = !state;
+        #endif
                 
         delay(blink_ms);
     }

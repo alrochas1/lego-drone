@@ -37,7 +37,12 @@ jobs:
           cd "$RUNNER_TEMP/pico-sdk"
           git submodule update --init
 
-      - name: Build firmware
+      - name: Build firmware (WiFi)
         env:
           PICO_SDK_PATH: ${{ runner.temp }}/pico-sdk
         run: ./build_firmware.sh
+
+      - name: Build firmware (no WiFi)
+        env:
+          PICO_SDK_PATH: ${{ runner.temp }}/pico-sdk
+        run: ./build_firmware.sh --clean --no-wifi
