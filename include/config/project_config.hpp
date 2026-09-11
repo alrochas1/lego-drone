@@ -55,11 +55,11 @@ namespace tasks {
     constexpr uint32_t SYSTEM_UPDATE_MS     = 50;   // 20 Hz
     constexpr uint32_t LED_BLINK_MS         = 500;  // 2 Hz
     constexpr uint32_t LOG_PRINT_MS         = 500;  // 2 Hz
-    constexpr uint32_t IMU_SAMPLE_MS        = 5;    // 200 Hz
+    constexpr uint32_t IMU_SAMPLE_MS        = 10;   // 100 Hz
     constexpr uint32_t IR_UPDATE_MS         = 20;   // 50 Hz
     constexpr uint32_t RC_UPDATE_MS         = 20;   // 50 Hz
-    constexpr uint32_t CONTROL_UPDATE_MS    = 5;    // 200 Hz
-    constexpr uint32_t MOTOR_UPDATE_MS      = 5;    // 200 Hz
+    constexpr uint32_t CONTROL_UPDATE_MS    = 10;   // 100 Hz
+    constexpr uint32_t MOTOR_UPDATE_MS      = 10;   // 100 Hz
 
 
     // Timeout constants for state machine countdowns

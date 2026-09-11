@@ -36,7 +36,7 @@ SystemQueues create_queues() {
 
     // Imput Queues
     queues.rc_data     = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(RCCommand));
-    queues.imu_data    = xQueueCreate(queues::SENSOR_QUEUE_LENGTH, sizeof(IMUData));
+    queues.imu_data    = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(IMUData));
     queues.rc_status   = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(RCStatus));
     queues.imu_status  = xQueueCreate(queues::SYSTEM_QUEUE_LENGTH, sizeof(IMUStatus));
     
@@ -123,7 +123,7 @@ int drone_main() {
     /*if (running_mode == RunMode::RC_SIM || running_mode == RunMode::SIMULATION) { */
         rc_task = new RCSimTask(queues.rc_data, queues.rc_status);
     /*} else {
-        // rc_task = new IRTask(pins::IR_PIN, queues.rc_data);
+        // rc_task = new RCTask(pins::RC_PIN, queues.rc_data);
     }*/
 
     // Control task

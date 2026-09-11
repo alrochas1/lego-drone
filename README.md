@@ -40,7 +40,7 @@ cd pico-sdk
 git submodule update --init
 ```
 
-Then export the Pico SDK path:
+Then export the Pico SDK path (or set it in your bash):
 ```
 export PICO_SDK_PATH=/route_to/pico-sdk
 ```

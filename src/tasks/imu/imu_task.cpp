@@ -38,7 +38,10 @@ void IMUTask::process_gyro_data(IMUData *sensor_data) {
             gyro_data.angular_velocity,
             imu_orientation);
 
-    sensor_data->gyro = gyro_data; 
+    // Convert dps to rad/s
+    gyro_data.angular_velocity = gyro_data.angular_velocity * (M_PI / 180.0f);
+
+    sensor_data->gyro = gyro_data;
 }
 
 // ACCEL ----
