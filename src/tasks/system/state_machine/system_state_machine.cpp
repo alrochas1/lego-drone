@@ -24,6 +24,7 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
         // - To USB if USB is connected
         // - To DISARMED if IMU is OK during INIT_COUNTDOWN cycles
         // - To ERROR if IMU not OK after IMU_COUNTDOWN cycles
+        // - Stay in INIT if IMU measurements are not stable yet
         // - Stay in INIT otherwise
         if (in.usb_connected)
         {
@@ -31,14 +32,17 @@ void SystemStateMachine::update_state(const SystemInputs& in) {
         } 
         else if (in.imu_ok) 
         {
-            init_count_++;
             imu_fail_count_ = 0;    // reset
 
-            if (init_count_ >= tasks::INIT_COUNTDOWN)
-            {
-                state_ = SystemState::DISARMED;
-                init_count_ = 0;        // reset
-                imu_fail_count_ = 0;    // reset
+            if (in.imu_stable){
+                init_count_++;
+
+                if (init_count_ >= tasks::INIT_COUNTDOWN)
+                {
+                    state_ = SystemState::DISARMED;
+                    init_count_ = 0;        // reset
+                    imu_fail_count_ = 0;    // reset
+                }
             }
         }
         else
