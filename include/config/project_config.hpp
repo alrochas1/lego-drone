@@ -74,6 +74,17 @@ namespace tasks {
     constexpr uint32_t THROTTLE_LOW_COUNTDOWN   = THROTTLE_LOW_TIMEOUT_MS/SYSTEM_UPDATE_MS;
 } // namespace tasks
 
+// Led blink intervals
+namespace led {
+    constexpr uint32_t LED_INIT_BLINK_MS      = 100;  // 10 Hz
+    constexpr uint32_t LED_USB_BLINK_MS       = 1000; // 1 Hz
+    constexpr uint32_t LED_DISARMED_BLINK_MS  = 500;  // 2 Hz
+    constexpr uint32_t LED_ARMED_BLINK_MS     = 1000; // 1 Hz
+    constexpr uint32_t LED_FLIGHT_BLINK_MS    = 2000; // 0.5 Hz
+    constexpr uint32_t LED_FAILSAFE_BLINK_MS  = 100;  // 10 Hz
+    constexpr uint32_t LED_ERROR_BLINK_MS     = 50;   // 20 Hz
+} // namespace led
+
 // Queue configuration
 namespace queues {
     constexpr uint8_t SYSTEM_QUEUE_LENGTH = 1;

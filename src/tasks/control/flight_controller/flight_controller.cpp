@@ -9,7 +9,7 @@ ControlOutput FlightController::update(
     const RCCommand& rc)
 {
     // Update the time delta based on the latest IMU timestamp
-    const float dt = update_dt(imu.gyro.timestamp_ms); // FIXME
+    const float dt = update_dt(imu.timestamp_ms);
     
     // Estimate the current state based on sensor data
     const Attitude current_state = attitude_estimator_.update(imu, dt);

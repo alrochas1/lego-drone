@@ -27,7 +27,7 @@ void LedTask::run() {
         if (xQueuePeek(snapshot_queue_, &snap, 0) == pdPASS) {
             blink_ms = get_blink_interval(snap.state);
         }
-        
+
         gpio_put(led_pin, state);
         state = !state;
                 
@@ -37,14 +37,14 @@ void LedTask::run() {
 
 uint32_t LedTask::get_blink_interval(SystemState state) {
     switch (state) {
-        // TODO: Move numbers to config
-        case SystemState::INIT:      return 2000;  
-        case SystemState::USB:       return 2000; 
-        case SystemState::DISARMED:  return 1000;  
-        case SystemState::ARMED:     return 500;  
-        case SystemState::FLIGHT:    return 250;  
-        case SystemState::FAILSAFE:  return 100;  
-        case SystemState::ERROR:     return 5000; 
+        case SystemState::INIT:      return led::LED_INIT_BLINK_MS;  
+        case SystemState::USB:       return led::LED_USB_BLINK_MS; 
+        case SystemState::DISARMED:  return led::LED_DISARMED_BLINK_MS;  
+        case SystemState::ARMED:     return led::LED_ARMED_BLINK_MS;  
+        case SystemState::FLIGHT:    return led::LED_FLIGHT_BLINK_MS;  
+        case SystemState::FAILSAFE:  return led::LED_FAILSAFE_BLINK_MS;  
+        case SystemState::ERROR:     return led::LED_ERROR_BLINK_MS; 
+
         default:                     return tasks::LED_BLINK_MS;  
     }
 }
