@@ -13,8 +13,9 @@
 ### INIT
 
 - USB connected -> USB
-- IMU healthy for INIT_COUNTDOWN consecutive cycles -> DISARMED
+- IMU healthy and stable for INIT_COUNTDOWN consecutive cycles -> DISARMED
 - IMU unhealthy for IMU_COUNTDOWN consecutive cycles -> ERROR
+- IMU unstable remains in INIT
 - Otherwise -> INIT
 
 Priority:

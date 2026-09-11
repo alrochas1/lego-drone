@@ -9,7 +9,7 @@ IMUTask::IMUTask(QueueHandle_t data_queue, QueueHandle_t status_queue)
     , gyro_(i2c1), accel_(i2c1) {
     
     printf("[IMU] Task created \n");
-    printf("[IMU] Gyro initialized.  I2C device address: 0x%02X on port %p\n", gyro_.get_address(), (void*)i2c1);
+    printf("[IMU] Gyro initialized.  I2C device address: 0x%02X on port %p\n", gyro_.get_address(),  (void*)i2c1);
     printf("[IMU] Accel initialized. I2C device address: 0x%02X on port %p\n", accel_.get_address(), (void*)i2c1);
 }
 
@@ -94,6 +94,9 @@ Vector3f IMUTask::transform_to_body_frame(
     };
 }
 
+
+
+// ############################################################################
 void IMUTask::run() {
     printf("[IMU] Task started - Sample rate: %lu ms\n", tasks::IMU_SAMPLE_MS);
     
@@ -112,12 +115,15 @@ void IMUTask::run() {
         process_gyro_data(&sensor_data);
         process_accel_data(&sensor_data);
 
-        sensor_data.sequence_number++;  // TODO: Change
+        // Fill timestamp data
+        sensor_data.timestamp_ms = to_ms_since_boot(get_absolute_time());
 
         // Fill status data
-        status_data.valid = sensor_data.is_complete();
-        status_data.sequence_number = sensor_data.sequence_number;
-        // TODO: Add timestamp to status data
+        status_data.timestamp_ms  = sensor_data.timestamp_ms;
+        status_data.valid         = sensor_data.is_complete();
+        status_data.healthy_gyro  = sensor_data.is_gyro_healthy();
+        status_data.healthy_accel = sensor_data.is_accel_healthy();
+        status_data.healthy_mag   = sensor_data.is_mag_healthy();
 
         // Send data to other tasks
         // TODO: Add error handling

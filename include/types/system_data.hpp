@@ -24,6 +24,8 @@ struct SystemInputs {
     bool imu_ok;
     bool rc_ok;
 
+    bool imu_stable;
+
     float throttle;
 };
 
