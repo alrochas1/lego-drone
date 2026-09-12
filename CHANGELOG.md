@@ -26,6 +26,46 @@ All notable changes to this project will be documented in this file.
 - [ ] PCB for Motor Driver
 
 
+## [0.3.0] - 2026-09-13
+
+### Added
+
+#### Flight Control
+- First implementation of cascaded PID flight control with attitude estimation
+- Refactored the control task into separate estimator, controller, and motor mixer components
+- Separate attitude and rate controllers with a common control interface
+- Motor mixer for distributing control commands to the motors
+- Configurable number of motors
+- Added a separate healthy status to IMU status reporting
+
+#### Testing and Automation
+- Added unit tests for the flight control components
+- Added automated release workflow
+- Extended control test coverage
+
+#### Documentation
+- Added hardware description and task structure documentation
+- Updated system state machine documentation and diagrams
+- Added motor-driver PCB documentation
+
+### Code
+- Reorganized drivers by responsibility into bus, sensor, actuator, and communication directories
+- Refactored queue data structures and task interfaces
+- Improved IMU task behavior and sensor data handling
+
+### Fixed
+- Corrected body-frame rotation and zero-throttle handling in the control logic
+- Fixed minor controller and LSM303D issues
+- Fixed minor IMU task issues and improved handling of invalid measurements
+
+### Known Limitations
+- Firmware is not yet suitable for flight
+- IR task is not yet implemented (commented out in `main.cpp`)
+- RC driver is not yet implemented. RC input pins are not yet configured
+- RC input pins are not yet configured for a physical receiver
+- Magnetometer support is incomplete in the LSM303D driver
+
+
 ## [0.2.0] - 2026-08-26
 
 ### Added
@@ -46,7 +86,7 @@ All notable changes to this project will be documented in this file.
 
 
 ### Known Limitations
-
+- Firmware is not yet suitable for flight
 - IR task is not yet implemented (commented out in `main.cpp`)
 - RC driver is not yet implemented
 - RC input pins are not yet configured for a physical receiver
@@ -90,7 +130,7 @@ All notable changes to this project will be documented in this file.
 
 
 ### Known Limitations
-
+- Firmware is not yet suitable for flight
 - IR task not yet implemented (commented out in main.cpp)
 - RC driver is not yet implemented
 - RC input pins not yet configured
