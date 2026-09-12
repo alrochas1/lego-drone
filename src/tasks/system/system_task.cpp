@@ -40,7 +40,9 @@ void SystemStateTask::run() {
 
         // IMU
         if (xQueueReceive(imu_queue_, &imu, 0) == pdPASS) {
-            inputs.imu_ok = imu.valid;
+            inputs.imu_ok       = imu.valid;
+            inputs.imu_stable   = imu.healthy_gyro && imu.healthy_accel;
+            
             snap.imu = imu;
         }
 

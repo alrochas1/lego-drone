@@ -13,20 +13,21 @@ namespace i2c {
 
 // IMU addresses
 namespace imu {
-    constexpr uint8_t GYRO_ADDRESS = 0x69;      // L3GD20
-    constexpr uint8_t ACCEL_ADDRESS = 0x1E;     // LSM303D
+    constexpr uint8_t GYRO_ADDRESS  = 0x6B;     // L3GD20
+    constexpr uint8_t ACCEL_ADDRESS = 0x19;     // LSM303D
+    constexpr uint8_t MAG_ADDRESS   = 0x1E;     // LSM303D
     
     namespace gyro{
         constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for L3GD20
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for L3GD20
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for L3GD20
     }
     namespace accel{
-        constexpr uint8_t WHO_AM_I_VALUE = 0x3C;   // WHO_AM_I value for LSM303D accel
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for LSM303D accel
+        constexpr uint8_t WHO_AM_I_VALUE = 0x33;   // WHO_AM_I value for LSM303D accel
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for LSM303D accel
     }
     namespace mag{
-        constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for LSM303D mag (revisar)
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for LSM303D mag
+        constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for LSM303D mag (check)
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for LSM303D mag
     }
 } // namespace imu
 
@@ -73,6 +74,17 @@ namespace tasks {
     constexpr uint32_t INIT_COUNTDOWN           = INIT_TIMEOUT_MS/SYSTEM_UPDATE_MS;
     constexpr uint32_t THROTTLE_LOW_COUNTDOWN   = THROTTLE_LOW_TIMEOUT_MS/SYSTEM_UPDATE_MS;
 } // namespace tasks
+
+// Led blink intervals
+namespace led {
+    constexpr uint32_t LED_INIT_BLINK_MS      = 100;  // 10 Hz
+    constexpr uint32_t LED_USB_BLINK_MS       = 1000; // 1 Hz
+    constexpr uint32_t LED_DISARMED_BLINK_MS  = 500;  // 2 Hz
+    constexpr uint32_t LED_ARMED_BLINK_MS     = 1000; // 1 Hz
+    constexpr uint32_t LED_FLIGHT_BLINK_MS    = 2000; // 0.5 Hz
+    constexpr uint32_t LED_FAILSAFE_BLINK_MS  = 100;  // 10 Hz
+    constexpr uint32_t LED_ERROR_BLINK_MS     = 50;   // 20 Hz
+} // namespace led
 
 // Queue configuration
 namespace queues {

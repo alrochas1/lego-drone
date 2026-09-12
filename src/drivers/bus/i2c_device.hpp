@@ -32,6 +32,7 @@ protected:
     }
     
     bool verify_connection(uint8_t who_am_i_reg, uint8_t expected_id);
+    void i2c_scan();
 
 public:
     I2CDevice(i2c_inst_t* i2c, uint8_t address);

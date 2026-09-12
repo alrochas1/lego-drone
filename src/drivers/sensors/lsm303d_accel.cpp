@@ -110,5 +110,5 @@ AccelData LSM303D_Accel::read_accel() {
         static_cast<float>(raw_z) * sensitivity_ * 9.80665f
     );
     
-    return AccelData(linear_acceleration, to_ms_since_boot(get_absolute_time()));
+    return AccelData(linear_acceleration);
 }

@@ -11,8 +11,9 @@ namespace {
 SystemInputs healthyInputs()
 {
     SystemInputs inputs{};
-    inputs.imu_ok   = true;
-    inputs.rc_ok = true;
+    inputs.imu_ok       = true;
+    inputs.imu_stable   = true;
+    inputs.rc_ok        = true;
     return inputs;
 }
 
@@ -102,8 +103,7 @@ TEST(SystemStateMachineTest, InitToDisarmed)
 {
     SystemStateMachine fsm;
 
-    SystemInputs inputs{};
-    inputs.imu_ok = true;
+    SystemInputs inputs = healthyInputs();
 
     expectTimedTransition(
         fsm,

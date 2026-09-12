@@ -33,12 +33,14 @@ void LogTask::run() {
                 snap.rc.throttle);
 
             // IMU
+            bool gyro_valid = snap.imu.valid && snap.imu.healthy_gyro;
             printf("[GYRO] Valid:%s | t=%lu\n",
-                snap.imu.valid ? "OK" : "FAIL",
+                gyro_valid ? "OK" : "FAIL",
                 snap.imu.timestamp_ms);
             
+            bool accel_valid = snap.imu.valid && snap.imu.healthy_accel;
             printf("[ACCEL] Valid:%s | t=%lu\n",
-                snap.imu.valid ? "OK" : "FAIL",
+                accel_valid ? "OK" : "FAIL",
                 snap.imu.timestamp_ms);
         }
 

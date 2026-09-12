@@ -107,6 +107,6 @@ GyroData L3GD20::read_gyro() {
         static_cast<float>(raw_z) * sensitivity_dps_digit_
     );
     
-    GyroData data(angular_velocity, to_ms_since_boot(get_absolute_time()));
+    GyroData data(angular_velocity);
     return data;
 }

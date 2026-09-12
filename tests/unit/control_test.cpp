@@ -32,7 +32,7 @@ struct ControlTestRig {
 
     void advance_time(uint32_t milliseconds = TEST_TIMESTEP_MS)
     {
-        imu.gyro.timestamp_ms += milliseconds;
+        imu.timestamp_ms += milliseconds;
     }
 
     MotorCommands run_settled(ControlOutput& control)
