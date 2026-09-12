@@ -148,3 +148,14 @@ bool I2CDevice::verify_connection(uint8_t who_am_i_reg, uint8_t expected_id) {
     printf("[I2C] Device connected: WHO_AM_I = 0x%02X\n", who_am_i);
     return true;
 }
+
+void I2CDevice::i2c_scan() {
+    printf("Scanning I2C bus for devices...\n");
+    for (uint8_t addr = 0x08; addr <= 0x77; ++addr) {
+        absolute_time_t timeout = make_timeout_time_ms(i2c::TIMEOUT_MS);
+        int ret = i2c_write_blocking(i2c_port_, addr, nullptr, 1, false);
+        if (ret >= 0) {
+            printf("Found device at address 0x%02X\n", addr);
+        }
+    }
+}

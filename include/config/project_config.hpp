@@ -13,20 +13,21 @@ namespace i2c {
 
 // IMU addresses
 namespace imu {
-    constexpr uint8_t GYRO_ADDRESS = 0x69;      // L3GD20
-    constexpr uint8_t ACCEL_ADDRESS = 0x1E;     // LSM303D
+    constexpr uint8_t GYRO_ADDRESS  = 0x6B;     // L3GD20
+    constexpr uint8_t ACCEL_ADDRESS = 0x19;     // LSM303D
+    constexpr uint8_t MAG_ADDRESS   = 0x1E;     // LSM303D
     
     namespace gyro{
         constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for L3GD20
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for L3GD20
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for L3GD20
     }
     namespace accel{
-        constexpr uint8_t WHO_AM_I_VALUE = 0x3C;   // WHO_AM_I value for LSM303D accel
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for LSM303D accel
+        constexpr uint8_t WHO_AM_I_VALUE = 0x33;   // WHO_AM_I value for LSM303D accel
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for LSM303D accel
     }
     namespace mag{
-        constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for LSM303D mag (revisar)
-        constexpr uint8_t WHO_AM_I_REG = 0x0F;     // WHO_AM_I register for LSM303D mag
+        constexpr uint8_t WHO_AM_I_VALUE = 0xD3;   // WHO_AM_I value for LSM303D mag (check)
+        constexpr uint8_t WHO_AM_I_REG   = 0x0F;   // WHO_AM_I register for LSM303D mag
     }
 } // namespace imu
 
