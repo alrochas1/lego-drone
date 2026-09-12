@@ -46,7 +46,7 @@ jobs:
         if: steps.version.outputs.version == ''
         run: |
           echo "Cannot extract version from branch name: ${{ github.head_ref }}"
-          echo "The format must be: YY-release-vX.X (e.g., 13-release-v0.2)"
+          echo "The format must be: YY-release-vXX (e.g., 13-release-v02)"
           exit 1
 
       - name: Check if PR to main exists
